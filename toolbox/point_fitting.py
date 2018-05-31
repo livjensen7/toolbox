@@ -96,7 +96,7 @@ def fitRoutine(Image, x, y, bbox):
         2.25853845,  0.11157521])
     '''
     db = int(np.floor(bbox/2))
-    bbox = bbox+(1-bbox%1)
+    bbox = bbox+(1-bbox%2)
     span_x = np.linspace(x-db,x+db, bbox)
     span_y = np.linspace(y-db,y+db, bbox)
     X,Y = np.meshgrid(span_x, span_y)
