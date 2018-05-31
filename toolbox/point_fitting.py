@@ -24,7 +24,9 @@ def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
         >>> import numpy as np
         >>> import toolbox.point_fitting as pt
         >>> x,y = np.linspace(0,5,6), np.linspace(0,5,6)
-        >>> pt.twoD_Gaussian((x,y),1,2.5,2.5,1,1,1,.2)
+        >>> pt.twoD_Gaussian((x,y),1,2.5,2.5,1,1,0,.2)
+        array([0.20193045, 0.30539922, 0.97880078, 0.97880078, 0.30539922,
+       0.20193045])
     '''
     (x,y) = span
     mu_x = float(mu_x)
@@ -49,10 +51,9 @@ def findMaxima(image,size,threshold_method = "threshold_otsu"):
     :Example:
         >>> import toolbox.point_fitting as pt
         >>> import toolbox.testdata as test
-        >>> from skimage.external.tifffile import imread
-        >>> im = imread(test.image1)
+        >>> im = test.single_max()
         >>> print(pt.findMaxima(im,10))
-        [(x1,y1)]
+        [(17, 14)]
     '''
     im_max = filters.maximum_filter(image, size)
     im_min = filters.minimum_filter(image, size)
@@ -87,9 +88,7 @@ def fitRoutine(Image, x, y, bbox):
     :Example:
         >>> import toolbox.point_fitting as pt
         >>> import toolbox.testdata as test
-        >>> from skimage.external.tifffile import imread
-        >>> im = imread(test.image1)
-        >>> x,y = pt.findMaxima(im,10)
+\       >>> x,y = pt.findMaxima(im,10)[0]
         >>> fit = pt.fitRoutine(im, x, y, 10)
         >>> print(Fit)
         [1,2,3,4,5,6]
@@ -104,7 +103,7 @@ def fitRoutine(Image, x, y, bbox):
         scaled = [k/max(pixel_vals) for k in pixel_vals]
         initial_guess = (1, x, y, 1, 1, 0, 0)
         try:
-            popt, pcov = curve_fit(function, (X, Y), scaled, p0=initial_guess)
+            popt, pcov = curve_fit(twoD_Gaussian, (X, Y), scaled, p0=initial_guess)
         except RuntimeError:
             popt = None
     else:
