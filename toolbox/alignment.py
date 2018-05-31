@@ -1,10 +1,11 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from toolbox.point_fitting import findMaxima, fitRoutine
 from scipy.stats import norm
 
 
 def FD_rule_bins(data):
-    '''
+    """
     Finds the optimal spacing of histogram bins based on the
     Freedman-Diaconis rule. https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule
 
@@ -21,14 +22,14 @@ def FD_rule_bins(data):
         array([-2.25503346, -1.75181888, -1.2486043 , -0.74538972, -0.24217514,
                 0.26103944,  0.76425402,  1.2674686 ,  1.77068318,  2.27389776,
                 2.77711234])
-    '''
+    """
     iqr = np.percentile(data, 75) - np.percentile(data, 25)
     opt_binwidth = 2*iqr/(len(data)**(1/3.))
     return np.arange(min(data), max(data) + opt_binwidth, opt_binwidth)
 
 
 def scrub_outliers(data,recurse = 2):
-    '''
+    """
     Removes outliers from data based on standard deviation.
     if data point is more than two standard deviations away from the mean
     it is removed. Process is iterative.
@@ -52,7 +53,7 @@ def scrub_outliers(data,recurse = 2):
         >>> plt.hist(x,FD_rule_bins(x),fc = "m")
         >>> plt.hist(scrubed_x,FD_rule_bins(x), fc = "g")
         >>> plt.show()
-    '''
+    """
 
     recur_count = 0
     while recur_count<recurse:
@@ -65,7 +66,7 @@ def scrub_outliers(data,recurse = 2):
 
 
 def get_offset_distribution(Image,dx,dy,bbox):
-    '''
+    """
     Image passed to this function should be 2-channel data divided vertically.
     This function in order:
         * splits the image into left and right channels
@@ -88,7 +89,7 @@ def get_offset_distribution(Image,dx,dy,bbox):
         >>> x_dist,y_dist = al.get_offset_distribution(im, 8,3,8)
         >>> plt.hist(x_dist),plt.hist(y_dist)
         >>> plt.show()
-    '''
+    """
     leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
     rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
     Delta_x,Delta_y = [],[]
@@ -106,10 +107,10 @@ def get_offset_distribution(Image,dx,dy,bbox):
     return(Delta_x,Delta_y)
 
 def findGlobalOffset(im_list, dx, dy, bbox):
-    '''
+    """
     finds the optimal x-shift and y-shift of the data.
 
-    :param file_list: 1D list of file paths for images used in determination of the offset
+    :param im_list: 1D list of image arrays used in determination of the offset
     :param dx: int, maximum distance in x to look for corresponding points in separate channels.
     :param dy: int, maximum distance in y to look for corresponding points in separate channels.
     :param bbox: int, size of ROI around each point to apply gaussian fit.
@@ -121,9 +122,9 @@ def findGlobalOffset(im_list, dx, dy, bbox):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()
-        >>> print(al.findGlobalOffset(im, 8,3,8))
-        2323
-    '''
+        >>> print(al.findGlobalOffset(im, 8,3,7))
+        (5.860408756886414, -2.7643538511181185)
+    """
     pooled_x, pooled_y = [], []
     for im in im_list:
         xdist, ydist = get_offset_distribution(im, dx, dy, bbox)
@@ -132,3 +133,37 @@ def findGlobalOffset(im_list, dx, dy, bbox):
     mu1, sigma1 = norm.fit(pooled_x)
     mu2, sigma2 = norm.fit(pooled_y)
     return mu1, mu2
+
+
+def plotAssignedMaxima(Image,dx,dy):
+    """
+    plots the assigned maxima from each channel
+
+    :param Image: 2D image array
+    :param dx: int, maximum distance in x to look for corresponding points in separate channels.
+    :param dy: int, maximum distance in y to look for corresponding points in separate channels.
+
+    :return: plot of assigned points.
+
+    :Example:
+
+        >>> import toolbox.alignment as al
+        >>> import toolbox.testdata as test
+        >>> im = test.image_stack()[0]
+        >>> al.plotAssignedMaxima(im,8,3)
+    """
+    leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
+    rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
+    print(np.hsplit(Image, 2)[1].shape)
+    fig = plt.figure(figsize=(Image.shape[0]/64,Image.shape[1]/64))
+    plt.axis('off')
+    plt.imshow(Image, cmap = "binary_r")
+    plt.title("Assigned matching points")
+    for x1,y1 in leftch_maxima:
+        for x2,y2 in rightch_maxima:
+            if abs(x1-x2)<=dx and abs(y1-y2)<=dy:
+                tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
+                plt.plot(x1,y1, color = tmp_color, marker = '+')
+                plt.plot(x2+256,y2, color = tmp_color, marker = '+')
+                plt.plot([x1,x2+256],[y1,y2], color = tmp_color)
+    plt.show()
