@@ -88,10 +88,12 @@ def fitRoutine(Image, x, y, bbox):
     :Example:
         >>> import toolbox.point_fitting as pt
         >>> import toolbox.testdata as test
+        >>> im = test.single_max()
         >>> x,y = pt.findMaxima(im,10)[0]
         >>> fit = pt.fitRoutine(im, x, y, 10)
         >>> print(Fit)
-        [1,2,3,4,5,6]
+        array([ 1.01462278, 16.74464408, 14.28216362,  0.78958828,  1.14957256,
+        2.25853845,  0.11157521])
     '''
     db = int(np.floor(bbox/2))
     bbox = bbox+(1-bbox%1)

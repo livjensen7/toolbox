@@ -1,5 +1,5 @@
 import numpy as np
-from toolbox.point_fitting import twoD_Gaussian, findMaxima
+from toolbox.point_fitting import twoD_Gaussian, findMaxima, fitRoutine
 
 def FD_rule_bins(data):
     '''
@@ -78,6 +78,17 @@ def get_offset_distribution(Image,dx,dy,bbox):
     :param bbox: int, size of ROI around each point to apply gaussian fit.
 
     :return: Two lists containing the x- and y- offsets of each corresponding pair of foci.
+
+    :Example:
+
+        >>> from toolbox.alignment import get_offset_distribution
+        >>> import toolbox.testdata as test
+        >>> im = test.image_stack()[0]
+        >>> A,B = get_offset_distribution(im, 8,3,8)
+
+
+
+
     '''
     leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
     rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
