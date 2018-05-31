@@ -12,6 +12,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/github/ReddingLab/toolbox",
     packages=setuptools.find_packages(),
+    package_data={'toolbox': ['toolbox/testdata/*.tif']},
     include_package_data=True,
     install_requires=[
           'numpy','scipy','scikit-image'
