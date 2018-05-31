@@ -96,8 +96,8 @@ def get_offset_distribution(Image,dx,dy,bbox):
     for x1,y1 in leftch_maxima:
         for x2,y2 in rightch_maxima:
             if abs(x1-x2)<=dx and abs(y1-y2)<=dy:
-                fit_ch1 = fitRoutine(twoD_Gaussian, np.hsplit(Image, 2)[0], x1, y1, bbox)
-                fit_ch2 = fitRoutine(twoD_Gaussian, np.hsplit(Image, 2)[1], x2, y2, bbox)
+                fit_ch1 = fitRoutine(np.hsplit(Image, 2)[0], x1, y1, bbox)
+                fit_ch2 = fitRoutine(np.hsplit(Image, 2)[1], x2, y2, bbox)
                 try:
                     Delta_x.append(fit_ch1[1]-fit_ch2[1])
                     Delta_y.append(fit_ch1[2]-fit_ch2[2])
