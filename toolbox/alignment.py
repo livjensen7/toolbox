@@ -62,8 +62,6 @@ def scrub_outliers(data,recurse = 2):
 
 
 
-
-
 def get_offset_distribution(Image,dx,dy,bbox):
     '''
     Image passed to this function should be 2-channel data divided vertically.
@@ -81,14 +79,13 @@ def get_offset_distribution(Image,dx,dy,bbox):
 
     :Example:
 
-        >>> from toolbox.alignment import get_offset_distribution
+        >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
+        >>> import matplotlib.pyplot as plt
         >>> im = test.image_stack()[0]
-        >>> A,B = get_offset_distribution(im, 8,3,8)
-
-
-
-
+        >>> x_dist,y_dist = al.get_offset_distribution(im, 8,3,8)
+        >>> plt.hist(x_dist),plt.hist(y_dist)
+        >>> plt.show()
     '''
     leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
     rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
@@ -106,7 +103,7 @@ def get_offset_distribution(Image,dx,dy,bbox):
                     pass
     return(Delta_x,Delta_y)
 
-def findGlobalOffset(file_list, dx, dy, bbox):
+def findGlobalOffset(im_list, dx, dy, bbox):
     '''
     finds the optimal x-shift and y-shift of the data.
 
@@ -116,10 +113,17 @@ def findGlobalOffset(file_list, dx, dy, bbox):
     :param bbox: int, size of ROI around each point to apply gaussian fit.
 
     :return: Mean x and y shift values to align all images best fit.
+
+    :Example:
+
+        >>> import toolbox.alignment as al
+        >>> import toolbox.testdata as test
+        >>> im = test.image_stack()
+        >>> print(al.findGlobalOffset(im, 8,3,8))
+        2323
     '''
     pooled_x, pooled_y = [], []
-    for fname in file_list:
-        im = imread(fname)
+    for im in im_list:
         xdist, ydist = getOffsetDistribution(im, dx, dy, bbox)
         pooled_x += scrubOutliers_recursive(xdist)
         pooled_y += scrubOutliers_recursive(ydist)
