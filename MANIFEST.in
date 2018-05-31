@@ -1,1 +1,1 @@
-include testdata/*.tif
+include testdata/single_max.tif
