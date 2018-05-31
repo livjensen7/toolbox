@@ -124,7 +124,7 @@ def findGlobalOffset(im_list, dx, dy, bbox):
     '''
     pooled_x, pooled_y = [], []
     for im in im_list:
-        xdist, ydist = getOffsetDistribution(im, dx, dy, bbox)
+        xdist, ydist = get_offset_distribution(im, dx, dy, bbox)
         pooled_x += scrubOutliers_recursive(xdist)
         pooled_y += scrubOutliers_recursive(ydist)
     mu1, sigma1 = norm.fit(pooled_x)
