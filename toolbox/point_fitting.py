@@ -78,7 +78,7 @@ def fitRoutine(Image, x, y, bbox):
     :param Image: 2D array containing ROI to be fit
     :param x: center of ROI in x
     :param x: center of ROI in y
-    :param bbox: length of the ROI on a side
+    :param bbox: length of the ROI on a side. if even, rounds up to next odd integer
 
     :return: 1D array of optimal parameters from gaussian fit.
     :return: ``None``
@@ -88,13 +88,13 @@ def fitRoutine(Image, x, y, bbox):
     :Example:
         >>> import toolbox.point_fitting as pt
         >>> import toolbox.testdata as test
-\       >>> x,y = pt.findMaxima(im,10)[0]
+        >>> x,y = pt.findMaxima(im,10)[0]
         >>> fit = pt.fitRoutine(im, x, y, 10)
         >>> print(Fit)
         [1,2,3,4,5,6]
     '''
-
     db = int(np.floor(bbox/2))
+    bbox = bbox+(1-bbox%1)
     span_x = np.linspace(x-db,x+db, bbox)
     span_y = np.linspace(y-db,y+db, bbox)
     X,Y = np.meshgrid(span_x, span_y)
