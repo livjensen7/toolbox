@@ -3,6 +3,10 @@ import random as ra
 import matplotlib.pyplot as plt
 from toolbox.point_fitting import findMaxima, fitRoutine
 from scipy.stats import norm
+from scipy.ndimage import map_coordinates
+from skimage.transform import warp_coords
+
+
 
 
 def FD_rule_bins(data):
@@ -155,7 +159,7 @@ def plot_assigned_maxima(Image,dx,dy):
     """
     leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
     rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
-    print(np.hsplit(Image, 2)[1].shape)
+    width = np.hsplit(Image, 2)[1].shape[1]
     fig = plt.figure(figsize=(Image.shape[0]/64,Image.shape[1]/64))
     plt.axis('off')
     plt.imshow(Image, cmap = "binary_r")
@@ -165,6 +169,36 @@ def plot_assigned_maxima(Image,dx,dy):
             if abs(x1-x2)<=dx and abs(y1-y2)<=dy:
                 tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
                 plt.plot(x1,y1, color = tmp_color, marker = '+')
-                plt.plot(x2+256,y2, color = tmp_color, marker = '+')
-                plt.plot([x1,x2+256],[y1,y2], color = tmp_color)
+                plt.plot(x2+width,y2, color = tmp_color, marker = '+')
+                plt.plot([x1,x2+width],[y1,y2], color = tmp_color)
     plt.show()
+
+def align_by_offset(Image, shift_x, shift_y, shift_channel="right"):
+    """
+    shifts left or right channel to alignment.
+
+    :param Image: 2D image array
+    :param shift_x: float, channel shift in x
+    :param shift_y, float, channel shift in x
+
+    :return: 2D image array of aligned image
+
+    :Example:
+
+        >>> import toolbox.alignment as al
+        >>> import toolbox.testdata as test
+        >>> im = test.image_stack()
+        >>> Dx,Dy = al.findGlobalOffset(im, 8,3,7))
+        >>> new_image = al.align_by_offset(im[0],Dx,Dy)
+    """
+    left_channel = np.hsplit(Image, 2)[0]
+    right_channel = np.hsplit(Image, 2)[1]
+    if shift_channel == "right":
+        new_coords = warp_coords(lambda xy: xy - np.array([shift_x, shift_y]), right_channel.shape)
+        warped_channel = map_coordinates(right_channel, new_coords)
+        aligned_image = np.concatenate((left_channel, warped_channel), axis=1)
+    elif shift_channel == "left":
+        new_coords = warp_coords(lambda xy: xy + np.array([shift_x, shift_y]), left_channel.shape)
+        warped_channel = map_coordinates(left_channel, new_coords)
+        aligned_image = np.concatenate((warped_channel, right_channel), axis=1)
+    return aligned_image
