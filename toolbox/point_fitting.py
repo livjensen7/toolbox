@@ -1,11 +1,13 @@
+import numpy as np
 import skimage.filters as skim
 import scipy.ndimage as ndimage
 import scipy.ndimage.filters as filters
 from scipy.optimize import curve_fit
 
+
 def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
     '''
-    Two dimensional Guassian function, specifically for use with point-fitting functions.
+    Two dimensional Gaussian function, specifically for use with point-fitting functions.
 
     :param span: tuple containing arrays for the range of the gaussian function in x and y.
     :param amplitude: Height of the gaussian
@@ -14,15 +16,19 @@ def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
     :param sigma_x: standard deviation in x
     :param sigma_y: standard deviation in y
     :param theta: Angular offset of the coordinate axis, in radians counterclockwise from x axis.
-    :param offset: Coordinate axis offset from zero
+    :param offset: size of the noise floor
 
     :return: 1D array of values for the function across the range defined by span
 
     :Example:
-        >>> import twoD_Gaussian
-        >>> twoD_Gaussian()
+        >>> import numpy as np
+        >>> import toolbox.point_fitting as pt
+        >>> x,y = np.linspace(0,5,6), np.linspace(0,5,6)
+        >>> pt.twoD_Gaussian((x,y),1,2.5,2.5,1,1,1,.2)
     '''
     (x,y) = span
+    mu_x = float(mu_x)
+    mu_y = float(mu_y)
     a = (np.cos(theta)**2)/(2*sigma_x**2) + (np.sin(theta)**2)/(2*sigma_y**2)
     b = -(np.sin(2*theta))/(4*sigma_x**2) + (np.sin(2*theta))/(4*sigma_y**2)
     c = (np.sin(theta)**2)/(2*sigma_x**2) + (np.cos(theta)**2)/(2*sigma_y**2)
@@ -32,7 +38,7 @@ def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
 
 def findMaxima(image,size,threshold_method = "threshold_otsu"):
     '''
-    Locates point-based maxima in an image.
+    Locates maxima in an image.
 
     :param image: 2-dimensional image array.
     :param size: int, size of the maxima and minimum filters used
@@ -41,10 +47,12 @@ def findMaxima(image,size,threshold_method = "threshold_otsu"):
     :return: 1D array of [(x,y),...] defining the locations of each maximum
 
     :Example:
-        >>> import findMaxima
-        >>> Maxima = findMaxima(Image,10)
-        >>> print(Maxima)
-        [(x1,y1),(x2,y2),(x3,y3),...,(xn,yn)]
+        >>> import toolbox.point_fitting as pt
+        >>> import toolbox.testdata as test
+        >>> from skimage.external.tifffile import imread
+        >>> im = imread(test.image1)
+        >>> print(pt.findMaxima(im,10))
+        [(x1,y1)]
     '''
     im_max = filters.maximum_filter(image, size)
     im_min = filters.minimum_filter(image, size)
@@ -64,7 +72,7 @@ def findMaxima(image,size,threshold_method = "threshold_otsu"):
 
 def fitRoutine(Image, x, y, bbox):
     '''
-    Fit a gaussian function to single-point based data
+    Fits a 2D gaussian function to 2D image array.
 
     :param Image: 2D array containing ROI to be fit
     :param x: center of ROI in x
@@ -77,9 +85,12 @@ def fitRoutine(Image, x, y, bbox):
         if ROI falls (partially or otherwise) outside Image. Or, if curve_fit raises RuntimeError
 
     :Example:
-
-        >>> import fitRoutine
-        >>> fit = fitRoutine(image, x, y, 10)
+        >>> import toolbox.point_fitting as pt
+        >>> import toolbox.testdata as test
+        >>> from skimage.external.tifffile import imread
+        >>> im = imread(test.image1)
+        >>> x,y = pt.findMaxima(im,10)
+        >>> fit = pt.fitRoutine(im, x, y, 10)
         >>> print(Fit)
         [1,2,3,4,5,6]
     '''

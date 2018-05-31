@@ -1,5 +1,5 @@
 #pycharm biz
-/.idea
+/.idea/
 .idea
 
 # Compiled python modules.
@@ -15,4 +15,4 @@ __pycache__
 
 .DS_Store
 
-/docs
+/docs/
