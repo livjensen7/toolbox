@@ -1,5 +1,7 @@
 import numpy as np
-from toolbox.point_fitting import twoD_Gaussian, findMaxima, fitRoutine
+from toolbox.point_fitting import findMaxima, fitRoutine
+from scipy.stats import norm
+
 
 def FD_rule_bins(data):
     '''
@@ -125,8 +127,8 @@ def findGlobalOffset(im_list, dx, dy, bbox):
     pooled_x, pooled_y = [], []
     for im in im_list:
         xdist, ydist = get_offset_distribution(im, dx, dy, bbox)
-        pooled_x += scrubOutliers_recursive(xdist)
-        pooled_y += scrubOutliers_recursive(ydist)
+        pooled_x += scrub_outliers(xdist)
+        pooled_y += scrub_outliers(ydist)
     mu1, sigma1 = norm.fit(pooled_x)
     mu2, sigma2 = norm.fit(pooled_y)
     return mu1, mu2
