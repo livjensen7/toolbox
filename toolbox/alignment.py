@@ -179,7 +179,7 @@ def align_by_offset(Image, shift_x, shift_y, shift_channel="right"):
 
     :param Image: 2D image array
     :param shift_x: float, channel shift in x
-    :param shift_y, float, channel shift in x
+    :param shift_y: float, channel shift in x
 
     :return: 2D image array of aligned image
 
@@ -188,7 +188,7 @@ def align_by_offset(Image, shift_x, shift_y, shift_channel="right"):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()
-        >>> Dx,Dy = al.findGlobalOffset(im, 8,3,7))
+        >>> Dx,Dy = al.findGlobalOffset(im, 8,3,7)
         >>> new_image = al.align_by_offset(im[0],Dx,Dy)
     """
     left_channel = np.hsplit(Image, 2)[0]

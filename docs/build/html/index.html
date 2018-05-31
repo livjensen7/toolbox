@@ -74,7 +74,7 @@ Examples of how to use the functions on test data can be found at:
 <dl class="function">
 <dt id="point_fitting.twoD_Gaussian">
 <code class="descclassname">point_fitting.</code><code class="descname">twoD_Gaussian</code><span class="sig-paren">(</span><em>span</em>, <em>amplitude</em>, <em>mu_x</em>, <em>mu_y</em>, <em>sigma_x</em>, <em>sigma_y</em>, <em>theta</em>, <em>offset</em><span class="sig-paren">)</span><a class="headerlink" href="#point_fitting.twoD_Gaussian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Two dimensional Guassian function, specifically for use with point-fitting functions.</p>
+<dd><p>Two dimensional Gaussian function, specifically for use with point-fitting functions.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -87,15 +87,18 @@ Examples of how to use the functions on test data can be found at:
 <li><strong>sigma_x</strong> – standard deviation in x</li>
 <li><strong>sigma_y</strong> – standard deviation in y</li>
 <li><strong>theta</strong> – Angular offset of the coordinate axis, in radians counterclockwise from x axis.</li>
-<li><strong>offset</strong> – Coordinate axis offset from zero</li>
+<li><strong>offset</strong> – size of the noise floor</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">1D array of values for the function across the range defined by span</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">twoD_Gaussian</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">twoD_Gaussian</span><span class="p">()</span>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.point_fitting</span> <span class="k">as</span> <span class="nn">pt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pt</span><span class="o">.</span><span class="n">twoD_Gaussian</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">array([0.20193045, 0.30539922, 0.97880078, 0.97880078, 0.30539922,0.20193045])</span>
 </pre></div>
 </div>
 </td>
@@ -107,7 +110,7 @@ Examples of how to use the functions on test data can be found at:
 <dl class="function">
 <dt id="point_fitting.findMaxima">
 <code class="descclassname">point_fitting.</code><code class="descname">findMaxima</code><span class="sig-paren">(</span><em>image</em>, <em>size</em>, <em>threshold_method='threshold_otsu'</em><span class="sig-paren">)</span><a class="headerlink" href="#point_fitting.findMaxima" title="Permalink to this definition">¶</a></dt>
-<dd><p>Locates point-based maxima in an image.</p>
+<dd><p>Locates maxima in an image.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -122,10 +125,11 @@ Examples of how to use the functions on test data can be found at:
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">1D array of [(x,y),…] defining the locations of each maximum</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">findMaxima</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Maxima</span> <span class="o">=</span> <span class="n">findMaxima</span><span class="p">(</span><span class="n">Image</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Maxima</span><span class="p">)</span>
-<span class="go">[(x1,y1),(x2,y2),(x3,y3),...,(xn,yn)]</span>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.point_fitting</span> <span class="k">as</span> <span class="nn">pt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.testdata</span> <span class="k">as</span> <span class="nn">test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">single_max</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">findMaxima</span><span class="p">(</span><span class="n">im</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="go">[(17, 14)]</span>
 </pre></div>
 </div>
 </td>
@@ -137,7 +141,7 @@ Examples of how to use the functions on test data can be found at:
 <dl class="function">
 <dt id="point_fitting.fitRoutine">
 <code class="descclassname">point_fitting.</code><code class="descname">fitRoutine</code><span class="sig-paren">(</span><em>Image</em>, <em>x</em>, <em>y</em>, <em>bbox</em><span class="sig-paren">)</span><a class="headerlink" href="#point_fitting.fitRoutine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit a gaussian function to single-point based data</p>
+<dd><p>Fits a 2D gaussian function to 2D image array.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -146,7 +150,7 @@ Examples of how to use the functions on test data can be found at:
 <li><strong>Image</strong> – 2D array containing ROI to be fit</li>
 <li><strong>x</strong> – center of ROI in x</li>
 <li><strong>x</strong> – center of ROI in y</li>
-<li><strong>bbox</strong> – length of the ROI on a side</li>
+<li><strong>bbox</strong> – length of the ROI on a side. if even, rounds up to next odd integer</li>
 </ul>
 </td>
 </tr>
@@ -158,10 +162,14 @@ Examples of how to use the functions on test data can be found at:
 </p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">fitRoutine</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">fitRoutine</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.point_fitting</span> <span class="k">as</span> <span class="nn">pt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.testdata</span> <span class="k">as</span> <span class="nn">test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">single_max</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">findMaxima</span><span class="p">(</span><span class="n">im</span><span class="p">,</span><span class="mi">10</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">fitRoutine</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Fit</span><span class="p">)</span>
-<span class="go">[1,2,3,4,5,6]</span>
+<span class="go">array([ 1.01462278, 16.74464408, 14.28216362,  0.78958828,  1.14957256,</span>
+<span class="go">2.25853845,  0.11157521])</span>
 </pre></div>
 </div>
 </td>
@@ -266,7 +274,18 @@ This function in order:</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Two lists containing the x- and y- offsets of each corresponding pair of foci.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Two lists containing the x- and y- offsets of each corresponding pair of foci.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.alignment</span> <span class="k">as</span> <span class="nn">al</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.testdata</span> <span class="k">as</span> <span class="nn">test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">image_stack</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_dist</span><span class="p">,</span><span class="n">y_dist</span> <span class="o">=</span> <span class="n">al</span><span class="o">.</span><span class="n">get_offset_distribution</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">x_dist</span><span class="p">),</span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">y_dist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
 </td>
 </tr>
 </tbody>
@@ -275,21 +294,91 @@ This function in order:</p>
 
 <dl class="function">
 <dt id="alignment.findGlobalOffset">
-<code class="descclassname">alignment.</code><code class="descname">findGlobalOffset</code><span class="sig-paren">(</span><em>file_list</em>, <em>dx</em>, <em>dy</em>, <em>bbox</em><span class="sig-paren">)</span><a class="headerlink" href="#alignment.findGlobalOffset" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">alignment.</code><code class="descname">findGlobalOffset</code><span class="sig-paren">(</span><em>im_list</em>, <em>dx</em>, <em>dy</em>, <em>bbox</em><span class="sig-paren">)</span><a class="headerlink" href="#alignment.findGlobalOffset" title="Permalink to this definition">¶</a></dt>
 <dd><p>finds the optimal x-shift and y-shift of the data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>file_list</strong> – 1D list of file paths for images used in determination of the offset</li>
+<li><strong>im_list</strong> – 1D list of image arrays used in determination of the offset</li>
 <li><strong>dx</strong> – int, maximum distance in x to look for corresponding points in separate channels.</li>
 <li><strong>dy</strong> – int, maximum distance in y to look for corresponding points in separate channels.</li>
 <li><strong>bbox</strong> – int, size of ROI around each point to apply gaussian fit.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Mean x and y shift values to align all images best fit.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Mean x and y shift values to align all images best fit.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.alignment</span> <span class="k">as</span> <span class="nn">al</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.testdata</span> <span class="k">as</span> <span class="nn">test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">image_stack</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">al</span><span class="o">.</span><span class="n">findGlobalOffset</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+<span class="go">(5.860408756886414, -2.7643538511181185)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alignment.plot_assigned_maxima">
+<code class="descclassname">alignment.</code><code class="descname">plot_assigned_maxima</code><span class="sig-paren">(</span><em>Image</em>, <em>dx</em>, <em>dy</em><span class="sig-paren">)</span><a class="headerlink" href="#alignment.plot_assigned_maxima" title="Permalink to this definition">¶</a></dt>
+<dd><p>plots the assigned maxima from each channel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Image</strong> – 2D image array</li>
+<li><strong>dx</strong> – int, maximum distance in x to look for corresponding points in separate channels.</li>
+<li><strong>dy</strong> – int, maximum distance in y to look for corresponding points in separate channels.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">plot of assigned points.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.alignment</span> <span class="k">as</span> <span class="nn">al</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.testdata</span> <span class="k">as</span> <span class="nn">test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">image_stack</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">al</span><span class="o">.</span><span class="n">plot_assigned_maxima</span><span class="p">(</span><span class="n">im</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alignment.align_by_offset">
+<code class="descclassname">alignment.</code><code class="descname">align_by_offset</code><span class="sig-paren">(</span><em>Image</em>, <em>shift_x</em>, <em>shift_y</em>, <em>shift_channel='right'</em><span class="sig-paren">)</span><a class="headerlink" href="#alignment.align_by_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>shifts left or right channel to alignment.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Image</strong> – 2D image array</li>
+<li><strong>shift_x</strong> – float, channel shift in x</li>
+<li><strong>shift_y</strong> – float, channel shift in x</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">2D image array of aligned image</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.alignment</span> <span class="k">as</span> <span class="nn">al</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">toolbox.testdata</span> <span class="k">as</span> <span class="nn">test</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">image_stack</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dx</span><span class="p">,</span><span class="n">Dy</span> <span class="o">=</span> <span class="n">al</span><span class="o">.</span><span class="n">findGlobalOffset</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_image</span> <span class="o">=</span> <span class="n">al</span><span class="o">.</span><span class="n">align_by_offset</span><span class="p">(</span><span class="n">im</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Dx</span><span class="p">,</span><span class="n">Dy</span><span class="p">)</span>
+</pre></div>
+</div>
 </td>
 </tr>
 </tbody>

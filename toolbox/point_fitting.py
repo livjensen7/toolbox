@@ -6,7 +6,7 @@ from scipy.optimize import curve_fit
 
 
 def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
-    '''
+    """
     Two dimensional Gaussian function, specifically for use with point-fitting functions.
 
     :param span: tuple containing arrays for the range of the gaussian function in x and y.
@@ -25,9 +25,8 @@ def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
         >>> import toolbox.point_fitting as pt
         >>> x,y = np.linspace(0,5,6), np.linspace(0,5,6)
         >>> pt.twoD_Gaussian((x,y),1,2.5,2.5,1,1,0,.2)
-        array([0.20193045, 0.30539922, 0.97880078, 0.97880078, 0.30539922,
-       0.20193045])
-    '''
+        array([0.20193045, 0.30539922, 0.97880078, 0.97880078, 0.30539922,0.20193045])
+    """
     (x,y) = span
     mu_x = float(mu_x)
     mu_y = float(mu_y)
@@ -39,7 +38,7 @@ def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
     return g.ravel()
 
 def findMaxima(image,size,threshold_method = "threshold_otsu"):
-    '''
+    """
     Locates maxima in an image.
 
     :param image: 2-dimensional image array.
@@ -54,7 +53,7 @@ def findMaxima(image,size,threshold_method = "threshold_otsu"):
         >>> im = test.single_max()
         >>> print(pt.findMaxima(im,10))
         [(17, 14)]
-    '''
+    """
     im_max = filters.maximum_filter(image, size)
     im_min = filters.minimum_filter(image, size)
     im_diff = im_max - im_min
@@ -72,7 +71,7 @@ def findMaxima(image,size,threshold_method = "threshold_otsu"):
     return points
 
 def fitRoutine(Image, x, y, bbox):
-    '''
+    """
     Fits a 2D gaussian function to 2D image array.
 
     :param Image: 2D array containing ROI to be fit
@@ -94,7 +93,7 @@ def fitRoutine(Image, x, y, bbox):
         >>> print(Fit)
         array([ 1.01462278, 16.74464408, 14.28216362,  0.78958828,  1.14957256,
         2.25853845,  0.11157521])
-    '''
+    """
     db = int(np.floor(bbox/2))
     bbox = bbox+(1-bbox%2)
     span_x = np.linspace(x-db,x+db, bbox)
