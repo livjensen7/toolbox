@@ -1,4 +1,5 @@
 import numpy as np
+import random as ra
 import matplotlib.pyplot as plt
 from toolbox.point_fitting import findMaxima, fitRoutine
 from scipy.stats import norm
@@ -135,7 +136,7 @@ def findGlobalOffset(im_list, dx, dy, bbox):
     return mu1, mu2
 
 
-def plotAssignedMaxima(Image,dx,dy):
+def plot_assigned_maxima(Image,dx,dy):
     """
     plots the assigned maxima from each channel
 
@@ -150,7 +151,7 @@ def plotAssignedMaxima(Image,dx,dy):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()[0]
-        >>> al.plotAssignedMaxima(im,8,3)
+        >>> al.plot_assigned_maxima(im,8,3)
     """
     leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
     rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
