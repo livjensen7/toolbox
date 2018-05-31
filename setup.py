@@ -13,6 +13,12 @@ setuptools.setup(
     url="https://github.com/github/ReddingLab/toolbox",
     packages=setuptools.find_packages(),
     include_package_data=True,
+    data_files=[('tif', ['1_align.tif', '2_align.tif',
+                         '3_align.tif', '4_align.tif',
+                         '5_align.tif', '6_align.tif',
+                         '7_align.tif', '8_align.tif',
+                         '9_align.tif', '10_align.tif',
+                         '11_align.tif'])]
     install_requires=[
           'numpy','scipy','scikit-image'
       ],
