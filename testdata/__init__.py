@@ -1,6 +1,8 @@
 from skimage.external.tifffile import imread
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../testdata/'))
 
-rel_path =
 
 
 test_maximum = imread("single_max.tif")
