@@ -8,4 +8,4 @@ def single_max():
     return ski.imread(dir_path+"/single_max.tif")
 
 def image_stack():
-    return [ski.imread(dir_path+i) for i in os.listdir(dir_path) if i.endswith("_align.tif")]
+    return [ski.imread(dir_path+"/"+i) for i in os.listdir(dir_path) if i.endswith("_align.tif")]
