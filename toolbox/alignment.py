@@ -70,8 +70,12 @@ def scrub_outliers(data,recurse = 2):
     return data
 
 
+def im_split(Image, axis = 2):
+    return np.hsplit(Image, axis)[0],np.hsplit(Image, axis)[1]
 
-def get_offset_distribution(Image,bbox = 9):
+
+
+def get_offset_distribution(Image,bbox = 9,axis = 2,fsize = 10):
     """
     Image passed to this function should be 2-channel data divided vertically.
     This function in order:
@@ -94,16 +98,17 @@ def get_offset_distribution(Image,bbox = 9):
         >>> plt.hist(x_dist),plt.hist(y_dist)
         >>> plt.show()
     """
-    leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
-    rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
+    ch1,ch2 = im_split(Image,axis)
+    ch1_maxima = findMaxima(ch1,fsize)
+    ch2_maxima = findMaxima(ch2,fsize)
     Delta_x,Delta_y = [],[]
-    mytree = cKDTree(leftch_maxima)
-    dist, indexes = mytree.query(rightch_maxima)
-    for i in range(len(rightch_maxima)):
-        x1, y1 = leftch_maxima[indexes[i]]
-        x2, y2 = rightch_maxima[i]
-        fit_ch1 = fitRoutine(np.hsplit(Image, 2)[0], x1, y1, bbox)
-        fit_ch2 = fitRoutine(np.hsplit(Image, 2)[1], x2, y2, bbox)
+    mytree = cKDTree(ch1_maxima)
+    dist, indexes = mytree.query(ch2_maxima)
+    for i in range(len(ch2_maxima)):
+        x1, y1 = ch1_maxima[indexes[i]]
+        x2, y2 = ch2_maxima[i]
+        fit_ch1 = fitRoutine(ch1, x1, y1, bbox)
+        fit_ch2 = fitRoutine(ch2, x2, y2, bbox)
         try:
             Delta_x.append(fit_ch1[1]-fit_ch2[1])
             Delta_y.append(fit_ch1[2]-fit_ch2[2])
@@ -112,7 +117,7 @@ def get_offset_distribution(Image,bbox = 9):
             pass
     return(Delta_x,Delta_y)
 
-def find_global_offset(im_list, bbox = 9):
+def find_global_offset(im_list, bbox = 9,axis = 2,fsize = 10):
     """
     finds the optimal x-shift and y-shift of the data.
 
@@ -126,12 +131,12 @@ def find_global_offset(im_list, bbox = 9):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()
-        >>> print(al.find_global_offset(im, 8,3,7))
-        (5.860408756886414, -2.7643538511181185)
+        >>> print(al.find_global_offset(im))
+        (5.3995077855937135, -2.5451652701227854)
     """
     pooled_x, pooled_y = [], []
     for im in im_list:
-        xdist, ydist = get_offset_distribution(im, bbox)
+        xdist, ydist = get_offset_distribution(im, bbox, axis, fsize)
         pooled_x += scrub_outliers(xdist)
         pooled_y += scrub_outliers(ydist)
     mu1, sigma1 = norm.fit(pooled_x)
@@ -139,7 +144,7 @@ def find_global_offset(im_list, bbox = 9):
     return mu1, mu2
 
 
-def plot_assigned_maxima(Image):
+def plot_assigned_maxima(Image, axis = 2,fsize = 10):
     """
     plots the assigned maxima from each channel. Uses cKDTree
 
@@ -152,21 +157,22 @@ def plot_assigned_maxima(Image):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()[0]
-        >>> al.plot_assigned_maxima(im,8,3)
+        >>> al.plot_assigned_maxima(im)
     """
-    leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
-    rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
-    width = np.hsplit(Image, 2)[1].shape[1]
+    ch1, ch2 = im_split(Image, axis)
+    ch1_maxima = findMaxima(ch1, fsize)
+    ch2_maxima = findMaxima(ch2, fsize)
+    width = ch2.shape[1]
     fig = plt.figure(figsize=(Image.shape[0]/64,Image.shape[1]/64))
     plt.axis('off')
     plt.imshow(Image, cmap = "binary_r")
     plt.title("Assigned matching points")
 
-    mytree = cKDTree(leftch_maxima)
-    dist, indexes = mytree.query(rightch_maxima)
-    for i in range(len(rightch_maxima)):
-        x1, y1 = leftch_maxima[indexes[i]]
-        x2, y2 = rightch_maxima[i]
+    mytree = cKDTree(ch1_maxima)
+    dist, indexes = mytree.query(ch2_maxima)
+    for i in range(len(ch2_maxima)):
+        x1, y1 = ch1_maxima[indexes[i]]
+        x2, y2 = ch2_maxima[i]
         tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
         plt.plot(x1,y1, color = tmp_color, marker = '+')
         plt.plot(x2+width,y2, color = tmp_color, marker = '+')
