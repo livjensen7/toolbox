@@ -2,7 +2,7 @@ import numpy as np
 import random as ra
 import matplotlib.pyplot as plt
 from toolbox.point_fitting import find_maxima, fit_routine
-from scipy.stats import norm
+from scipy.stats import skewnorm
 from scipy.spatial import cKDTree
 from scipy.ndimage import map_coordinates
 from skimage.transform import warp_coords
@@ -168,8 +168,8 @@ def find_global_offset(im_list, bbox = 9,splitstyle = "hsplit",fsize = 10):
         xdist, ydist = get_offset_distribution(im, bbox, splitstyle, fsize)
         pooled_x += scrub_outliers(xdist)
         pooled_y += scrub_outliers(ydist)
-    mu1, sigma1 = norm.fit(pooled_x)
-    mu2, sigma2 = norm.fit(pooled_y)
+    skew, mu1, sigma1 = skewnorm.fit(pooled_x)
+    skew, mu2, sigma2 = skewnorm.fit(pooled_y)
     return mu1, mu2
 
 
