@@ -1,0 +1,27 @@
+Metadata-Version: 1.1
+Name: toolbox
+Version: 0.0.1
+Summary: Redding Lab analysis tools
+Home-page: https://github.com/github/ReddingLab/toolbox
+Author: Sy Redding
+Author-email: UNKNOWN
+License: UNKNOWN
+Description-Content-Type: text/markdown
+Description: # toolbox
+        
+        ----
+        
+        This package contains Redding Lab analysis tools. 
+        
+        Redding Lab toolbox tree
+        
+            ├── toolbox
+                ├── alignment.py
+                └── point_fitting.py
+        
+        ###### updates
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
