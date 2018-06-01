@@ -3,6 +3,7 @@ import random as ra
 import matplotlib.pyplot as plt
 from toolbox.point_fitting import findMaxima, fitRoutine
 from scipy.stats import norm
+from scipy.spatial import cKDTree
 from scipy.ndimage import map_coordinates
 from skimage.transform import warp_coords
 
@@ -70,7 +71,7 @@ def scrub_outliers(data,recurse = 2):
 
 
 
-def get_offset_distribution(Image,dx,dy,bbox):
+def get_offset_distribution(Image,bbox = 9):
     """
     Image passed to this function should be 2-channel data divided vertically.
     This function in order:
@@ -79,8 +80,6 @@ def get_offset_distribution(Image,dx,dy,bbox):
         * pairs up associated foci from each channel and determines their x- and y- offset
 
     :param Image: 2D image array
-    :param dx: int, maximum distance in x to look for corresponding points in separate channels.
-    :param dy: int, maximum distance in y to look for corresponding points in separate channels.
     :param bbox: int, size of ROI around each point to apply gaussian fit.
 
     :return: Two lists containing the x- and y- offsets of each corresponding pair of foci.
@@ -98,26 +97,26 @@ def get_offset_distribution(Image,dx,dy,bbox):
     leftch_maxima = findMaxima(np.hsplit(Image, 2)[0],10)
     rightch_maxima = findMaxima(np.hsplit(Image, 2)[1],10)
     Delta_x,Delta_y = [],[]
-    for x1,y1 in leftch_maxima:
-        for x2,y2 in rightch_maxima:
-            if abs(x1-x2)<=dx and abs(y1-y2)<=dy:
-                fit_ch1 = fitRoutine(np.hsplit(Image, 2)[0], x1, y1, bbox)
-                fit_ch2 = fitRoutine(np.hsplit(Image, 2)[1], x2, y2, bbox)
-                try:
-                    Delta_x.append(fit_ch1[1]-fit_ch2[1])
-                    Delta_y.append(fit_ch1[2]-fit_ch2[2])
+    mytree = cKDTree(leftch_maxima)
+    dist, indexes = mytree.query(rightch_maxima)
+    for i in range(len(leftch_maxima)):
+        x1, y1 = leftch_maxima[indexes[i]]
+        x2, y2 = rightch_maxima[i]
+        fit_ch1 = fitRoutine(np.hsplit(Image, 2)[0], x1, y1, bbox)
+        fit_ch2 = fitRoutine(np.hsplit(Image, 2)[1], x2, y2, bbox)
+        try:
+            Delta_x.append(fit_ch1[1]-fit_ch2[1])
+            Delta_y.append(fit_ch1[2]-fit_ch2[2])
             
-                except TypeError:
-                    pass
+        except TypeError:
+            pass
     return(Delta_x,Delta_y)
 
-def findGlobalOffset(im_list, dx, dy, bbox):
+def findGlobalOffset(im_list, bbox = 9):
     """
     finds the optimal x-shift and y-shift of the data.
 
     :param im_list: 1D list of image arrays used in determination of the offset
-    :param dx: int, maximum distance in x to look for corresponding points in separate channels.
-    :param dy: int, maximum distance in y to look for corresponding points in separate channels.
     :param bbox: int, size of ROI around each point to apply gaussian fit.
 
     :return: Mean x and y shift values to align all images best fit.
@@ -132,7 +131,7 @@ def findGlobalOffset(im_list, dx, dy, bbox):
     """
     pooled_x, pooled_y = [], []
     for im in im_list:
-        xdist, ydist = get_offset_distribution(im, dx, dy, bbox)
+        xdist, ydist = get_offset_distribution(im, bbox)
         pooled_x += scrub_outliers(xdist)
         pooled_y += scrub_outliers(ydist)
     mu1, sigma1 = norm.fit(pooled_x)
@@ -140,13 +139,11 @@ def findGlobalOffset(im_list, dx, dy, bbox):
     return mu1, mu2
 
 
-def plot_assigned_maxima(Image,dx,dy):
+def plot_assigned_maxima(Image):
     """
-    plots the assigned maxima from each channel
+    plots the assigned maxima from each channel. Uses cKDTree
 
     :param Image: 2D image array
-    :param dx: int, maximum distance in x to look for corresponding points in separate channels.
-    :param dy: int, maximum distance in y to look for corresponding points in separate channels.
 
     :return: plot of assigned points.
 
@@ -164,13 +161,16 @@ def plot_assigned_maxima(Image,dx,dy):
     plt.axis('off')
     plt.imshow(Image, cmap = "binary_r")
     plt.title("Assigned matching points")
-    for x1,y1 in leftch_maxima:
-        for x2,y2 in rightch_maxima:
-            if abs(x1-x2)<=dx and abs(y1-y2)<=dy:
-                tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
-                plt.plot(x1,y1, color = tmp_color, marker = '+')
-                plt.plot(x2+width,y2, color = tmp_color, marker = '+')
-                plt.plot([x1,x2+width],[y1,y2], color = tmp_color)
+
+    mytree = cKDTree(leftch_maxima)
+    dist, indexes = mytree.query(rightch_maxima)
+    for i in range(len(leftch_maxima)):
+        x1, y1 = leftch_maxima[indexes[i]]
+        x2, y2 = rightch_maxima[i]
+        tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
+        plt.plot(x1,y1, color = tmp_color, marker = '+')
+        plt.plot(x2+width,y2, color = tmp_color, marker = '+')
+        plt.plot([x1,x2+width],[y1,y2], color = tmp_color)
     plt.show()
 
 def align_by_offset(Image, shift_x, shift_y, shift_channel="right"):
