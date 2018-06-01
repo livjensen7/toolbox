@@ -90,7 +90,7 @@ def get_offset_distribution(Image,bbox = 9):
         >>> import toolbox.testdata as test
         >>> import matplotlib.pyplot as plt
         >>> im = test.image_stack()[0]
-        >>> x_dist,y_dist = al.get_offset_distribution(im, 8,3,8)
+        >>> x_dist,y_dist = al.get_offset_distribution(im)
         >>> plt.hist(x_dist),plt.hist(y_dist)
         >>> plt.show()
     """
@@ -100,6 +100,7 @@ def get_offset_distribution(Image,bbox = 9):
     mytree = cKDTree(leftch_maxima)
     dist, indexes = mytree.query(rightch_maxima)
     for i in range(len(leftch_maxima)):
+        print(len(leftch_maxima), len(indexes))
         x1, y1 = leftch_maxima[indexes[i]]
         x2, y2 = rightch_maxima[i]
         fit_ch1 = fitRoutine(np.hsplit(Image, 2)[0], x1, y1, bbox)
@@ -112,7 +113,7 @@ def get_offset_distribution(Image,bbox = 9):
             pass
     return(Delta_x,Delta_y)
 
-def findGlobalOffset(im_list, bbox = 9):
+def find_global_offset(im_list, bbox = 9):
     """
     finds the optimal x-shift and y-shift of the data.
 
@@ -126,7 +127,7 @@ def findGlobalOffset(im_list, bbox = 9):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()
-        >>> print(al.findGlobalOffset(im, 8,3,7))
+        >>> print(al.find_global_offset(im, 8,3,7))
         (5.860408756886414, -2.7643538511181185)
     """
     pooled_x, pooled_y = [], []
@@ -188,7 +189,7 @@ def align_by_offset(Image, shift_x, shift_y, shift_channel="right"):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()
-        >>> Dx,Dy = al.findGlobalOffset(im, 8,3,7)
+        >>> Dx,Dy = al.find_global_offset(im, 8,3,7)
         >>> new_image = al.align_by_offset(im[0],Dx,Dy)
     """
     left_channel = np.hsplit(Image, 2)[0]
