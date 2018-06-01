@@ -5,7 +5,7 @@ import scipy.ndimage.filters as filters
 from scipy.optimize import curve_fit
 
 
-def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
+def two_d_gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
     """
     Two dimensional Gaussian function, specifically for use with point-fitting functions.
 
@@ -24,7 +24,7 @@ def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
         >>> import numpy as np
         >>> import toolbox.point_fitting as pt
         >>> x,y = np.linspace(0,5,6), np.linspace(0,5,6)
-        >>> pt.twoD_Gaussian((x,y),1,2.5,2.5,1,1,0,.2)
+        >>> pt.two_d_gaussian((x,y),1,2.5,2.5,1,1,0,.2)
         array([0.20193045, 0.30539922, 0.97880078, 0.97880078, 0.30539922,0.20193045])
     """
     (x,y) = span
@@ -37,7 +37,7 @@ def twoD_Gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset):
                             + c*((y-mu_y)**2)))
     return g.ravel()
 
-def findMaxima(image,size,threshold_method = "threshold_otsu"):
+def find_maxima(image,size,threshold_method = "threshold_otsu"):
     """
     Locates maxima in an image.
 
@@ -51,7 +51,7 @@ def findMaxima(image,size,threshold_method = "threshold_otsu"):
         >>> import toolbox.point_fitting as pt
         >>> import toolbox.testdata as test
         >>> im = test.single_max()
-        >>> print(pt.findMaxima(im,10))
+        >>> print(pt.find_maxima(im,10))
         [(17, 14)]
     """
     im_max = filters.maximum_filter(image, size)
@@ -70,7 +70,7 @@ def findMaxima(image,size,threshold_method = "threshold_otsu"):
         points.append((dx.start,dy.start)) 
     return points
 
-def fitRoutine(Image, x, y, bbox):
+def fit_routine(Image, x, y, bbox):
     """
     Fits a 2D gaussian function to 2D image array.
 
@@ -88,8 +88,8 @@ def fitRoutine(Image, x, y, bbox):
         >>> import toolbox.point_fitting as pt
         >>> import toolbox.testdata as test
         >>> im = test.single_max()
-        >>> x,y = pt.findMaxima(im,10)[0]
-        >>> fit = pt.fitRoutine(im, x, y, 10)
+        >>> x,y = pt.find_maxima(im,10)[0]
+        >>> fit = pt.fit_routine(im, x, y, 10)
         >>> print(Fit)
         array([ 1.01462278, 16.74464408, 14.28216362,  0.78958828,  1.14957256,
         2.25853845,  0.11157521])
@@ -104,7 +104,7 @@ def fitRoutine(Image, x, y, bbox):
         scaled = [k/max(pixel_vals) for k in pixel_vals]
         initial_guess = (1, x, y, 1, 1, 0, 0)
         try:
-            popt, pcov = curve_fit(twoD_Gaussian, (X, Y), scaled, p0=initial_guess)
+            popt, pcov = curve_fit(two_d_gaussian, (X, Y), scaled, p0=initial_guess)
         except RuntimeError:
             popt = None
     else:

@@ -1,7 +1,7 @@
 import numpy as np
 import random as ra
 import matplotlib.pyplot as plt
-from toolbox.point_fitting import findMaxima, fitRoutine
+from toolbox.point_fitting import find_maxima, fit_routine
 from scipy.stats import norm
 from scipy.spatial import cKDTree
 from scipy.ndimage import map_coordinates
@@ -121,20 +121,21 @@ def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
         >>> im = test.image_stack()[0]
         >>> x_dist,y_dist = al.get_offset_distribution(im)
         >>> print(np.mean(x_dist),np.mean(x_dist))
+        3.7626076029453333 3.7626076029453333
         >>> plt.hist(x_dist),plt.hist(y_dist)
         >>> plt.show()
     """
     ch1,ch2 = im_split(Image,splitstyle)
-    ch1_maxima = findMaxima(ch1,fsize)
-    ch2_maxima = findMaxima(ch2,fsize)
+    ch1_maxima = find_maxima(ch1,fsize)
+    ch2_maxima = find_maxima(ch2,fsize)
     Delta_x,Delta_y = [],[]
     mytree = cKDTree(ch1_maxima)
     dist, indexes = mytree.query(ch2_maxima)
     for i in range(len(ch2_maxima)):
         x1, y1 = ch1_maxima[indexes[i]]
         x2, y2 = ch2_maxima[i]
-        fit_ch1 = fitRoutine(ch1, x1, y1, bbox)
-        fit_ch2 = fitRoutine(ch2, x2, y2, bbox)
+        fit_ch1 = fit_routine(ch1, x1, y1, bbox)
+        fit_ch2 = fit_routine(ch2, x2, y2, bbox)
         try:
             Delta_x.append(fit_ch1[1]-fit_ch2[1])
             Delta_y.append(fit_ch1[2]-fit_ch2[2])
@@ -190,8 +191,8 @@ def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
         >>> al.plot_assigned_maxima(im)
     """
     ch1, ch2 = im_split(Image, splitstyle)
-    ch1_maxima = findMaxima(ch1, fsize)
-    ch2_maxima = findMaxima(ch2, fsize)
+    ch1_maxima = find_maxima(ch1, fsize)
+    ch2_maxima = find_maxima(ch2, fsize)
     width = ch2.shape[1]
     fig = plt.figure(figsize=(Image.shape[0]/64,Image.shape[1]/64))
     plt.axis('off')
