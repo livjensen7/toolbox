@@ -17,7 +17,7 @@ def FD_rule_bins(data):
 
     :param data: 1D array of data points
 
-    :return: 1D array of bin edges. passes directly to numpy.histogram or matplotlib.plot.hist
+    :return: 1D array of bin edges. passes directly to numpy.histogram or matplotlib.pyplot.hist
 
     :Example:
 
@@ -38,7 +38,8 @@ def scrub_outliers(data,recurse = 2):
     """
     Removes outliers from data based on standard deviation.
     if data point is more than two standard deviations away from the mean
-    it is removed. Process is iterative.
+    it is removed.
+    Process is iterative.
 
     :param data: 1D array or list of data points
     :param recurse: Number of times to iterate over the process. Default is twice.
@@ -72,16 +73,13 @@ def scrub_outliers(data,recurse = 2):
 
 def im_split(Image, splitstyle = "hsplit"):
     """
-        Image passed to this function should be 2-channel data divided vertically.
-        This function in order:
-            * splits the image into left and right channels
-            * locates and fits all of the foci in each channel
-            * pairs up associated foci from each channel and determines their x- and y- offset
+        Image passed to this function is split into two channels based on split style.
+        ***note*** micromanager images and numpy arrays are indexed opposite of one another.
 
         :param Image: 2D image array
-        :param bbox: int, size of ROI around each point to apply gaussian fit.
+        :param splitstyle: *string*, accepts "hsplit", "vsplit". Default is "hsplit"
 
-        :return: Two lists containing the x- and y- offsets of each corresponding pair of foci.
+        :return: Two subarrays of Image split along specified axis.
 
         :Example:
 
@@ -93,21 +91,24 @@ def im_split(Image, splitstyle = "hsplit"):
             ((512, 256), (512, 256))
             >>> ch1,ch2 = al.im_split(im,"vsplit")
             >>> ch1.shape,ch2.shape
+            ((256, 512), (256, 512))
         """
     return getattr(np, splitstyle)(Image, 2)[0],getattr(np, splitstyle)(Image, 2)[1]
 
 
 
-def get_offset_distribution(Image,bbox = 9,axis = 2,fsize = 10):
+def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
     """
-    Image passed to this function should be 2-channel data divided vertically.
+    Image passed to this function should be 2-channel data.
     This function in order:
-        * splits the image into left and right channels
+        * splits the image into channels
         * locates and fits all of the foci in each channel
-        * pairs up associated foci from each channel and determines their x- and y- offset
+        * pairs up associated foci from each channel and determines their x- and y- offsets
 
     :param Image: 2D image array
-    :param bbox: int, size of ROI around each point to apply gaussian fit.
+    :param bbox: int, size of ROI around each point to apply gaussian fit. Default is 9.
+    :param splitstyle: string, accepts "hsplit", "vsplit". Default is "hsplit"
+    :param fsize: int, size of average filters used in maxima determination. Default is 10.
 
     :return: Two lists containing the x- and y- offsets of each corresponding pair of foci.
 
@@ -116,12 +117,14 @@ def get_offset_distribution(Image,bbox = 9,axis = 2,fsize = 10):
         >>> import toolbox.alignment as al
         >>> import toolbox.testdata as test
         >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
         >>> im = test.image_stack()[0]
         >>> x_dist,y_dist = al.get_offset_distribution(im)
+        >>> print(np.mean(x_dist),np.mean(x_dist))
         >>> plt.hist(x_dist),plt.hist(y_dist)
         >>> plt.show()
     """
-    ch1,ch2 = im_split(Image,axis)
+    ch1,ch2 = im_split(Image,splitstyle)
     ch1_maxima = findMaxima(ch1,fsize)
     ch2_maxima = findMaxima(ch2,fsize)
     Delta_x,Delta_y = [],[]
@@ -140,12 +143,14 @@ def get_offset_distribution(Image,bbox = 9,axis = 2,fsize = 10):
             pass
     return(Delta_x,Delta_y)
 
-def find_global_offset(im_list, bbox = 9,axis = 2,fsize = 10):
+def find_global_offset(im_list, bbox = 9,splitstyle = "hsplit",fsize = 10):
     """
     finds the optimal x-shift and y-shift of the data.
 
     :param im_list: 1D list of image arrays used in determination of the offset
-    :param bbox: int, size of ROI around each point to apply gaussian fit.
+    :param bbox: int, size of ROI around each point to apply gaussian fit. Default is 9.
+    :param splitstyle: string, accepts "hsplit", "vsplit". Default is "hsplit"
+    :param fsize: int, size of average filters used in maxima determination. Default is 10.
 
     :return: Mean x and y shift values to align all images best fit.
 
@@ -159,7 +164,7 @@ def find_global_offset(im_list, bbox = 9,axis = 2,fsize = 10):
     """
     pooled_x, pooled_y = [], []
     for im in im_list:
-        xdist, ydist = get_offset_distribution(im, bbox, axis, fsize)
+        xdist, ydist = get_offset_distribution(im, bbox, splitstyle, fsize)
         pooled_x += scrub_outliers(xdist)
         pooled_y += scrub_outliers(ydist)
     mu1, sigma1 = norm.fit(pooled_x)
@@ -167,11 +172,13 @@ def find_global_offset(im_list, bbox = 9,axis = 2,fsize = 10):
     return mu1, mu2
 
 
-def plot_assigned_maxima(Image, axis = 2,fsize = 10):
+def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
     """
     plots the assigned maxima from each channel. Uses cKDTree
 
     :param Image: 2D image array
+    :param splitstyle: string, accepts "hsplit", "vsplit". Default is "hsplit"
+    :param fsize: int, size of average filters used in maxima determination. Default is 10.
 
     :return: plot of assigned points.
 
@@ -182,7 +189,7 @@ def plot_assigned_maxima(Image, axis = 2,fsize = 10):
         >>> im = test.image_stack()[0]
         >>> al.plot_assigned_maxima(im)
     """
-    ch1, ch2 = im_split(Image, axis)
+    ch1, ch2 = im_split(Image, splitstyle)
     ch1_maxima = findMaxima(ch1, fsize)
     ch2_maxima = findMaxima(ch2, fsize)
     width = ch2.shape[1]
