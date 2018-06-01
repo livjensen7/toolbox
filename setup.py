@@ -15,7 +15,7 @@ setuptools.setup(
     package_data={'toolbox': ['testdata/*.tif']},
     include_package_data=True,
     install_requires=[
-          'numpy','scipy','scikit-image'
+          'numpy','scipy','scikit-image','matplotlib'
       ],
     classifiers=(
         "Programming Language :: Python :: 3",

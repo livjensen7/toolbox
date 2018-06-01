@@ -1,13 +1,12 @@
 #pycharm biz
-/.idea/
-.idea
+/.idea
 
 # Compiled python modules.
 *.pyc
 __pycache__
 
 # Setuptools distribution folder.
-/dist/
+/dist
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
@@ -15,4 +14,6 @@ __pycache__
 
 .DS_Store
 
-/docs/
+/docs
+
+/test
