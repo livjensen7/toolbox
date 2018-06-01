@@ -99,8 +99,7 @@ def get_offset_distribution(Image,bbox = 9):
     Delta_x,Delta_y = [],[]
     mytree = cKDTree(leftch_maxima)
     dist, indexes = mytree.query(rightch_maxima)
-    for i in range(len(leftch_maxima)):
-        print(len(leftch_maxima), len(indexes))
+    for i in range(len(rightch_maxima)):
         x1, y1 = leftch_maxima[indexes[i]]
         x2, y2 = rightch_maxima[i]
         fit_ch1 = fitRoutine(np.hsplit(Image, 2)[0], x1, y1, bbox)
@@ -165,7 +164,7 @@ def plot_assigned_maxima(Image):
 
     mytree = cKDTree(leftch_maxima)
     dist, indexes = mytree.query(rightch_maxima)
-    for i in range(len(leftch_maxima)):
+    for i in range(len(rightch_maxima)):
         x1, y1 = leftch_maxima[indexes[i]]
         x2, y2 = rightch_maxima[i]
         tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
