@@ -34,7 +34,7 @@ def FD_rule_bins(data):
     return np.arange(min(data), max(data) + opt_binwidth, opt_binwidth)
 
 
-def scrub_outliers(data,recurse = 2):
+def scrub_outliers(data,recurse = 5):
     """
     Removes outliers from data based on standard deviation.
     if data point is more than two standard deviations away from the mean
@@ -42,7 +42,7 @@ def scrub_outliers(data,recurse = 2):
     Process is iterative.
 
     :param data: 1D array or list of data points
-    :param recurse: Number of times to iterate over the process. Default is twice.
+    :param recurse: Number of times to iterate over the process. Default is five iterations.
 
     :return: New 1D list of data without outliers.
 
