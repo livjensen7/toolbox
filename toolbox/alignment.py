@@ -70,8 +70,31 @@ def scrub_outliers(data,recurse = 2):
     return data
 
 
-def im_split(Image, axis = 2):
-    return np.hsplit(Image, axis)[0],np.hsplit(Image, axis)[1]
+def im_split(Image, splitstyle = "hsplit"):
+    """
+        Image passed to this function should be 2-channel data divided vertically.
+        This function in order:
+            * splits the image into left and right channels
+            * locates and fits all of the foci in each channel
+            * pairs up associated foci from each channel and determines their x- and y- offset
+
+        :param Image: 2D image array
+        :param bbox: int, size of ROI around each point to apply gaussian fit.
+
+        :return: Two lists containing the x- and y- offsets of each corresponding pair of foci.
+
+        :Example:
+
+            >>> import toolbox.alignment as al
+            >>> import toolbox.testdata as test
+            >>> im = test.image_stack()[0]
+            >>> ch1,ch2 = al.im_split(im)
+            >>> ch1.shape,ch2.shape
+            ((512, 256), (512, 256))
+            >>> ch1,ch2 = al.im_split(im,"vsplit")
+            >>> ch1.shape,ch2.shape
+        """
+    return getattr(np, splitstyle)(Image, 2)[0],getattr(np, splitstyle)(Image, 2)[1]
 
 
 
