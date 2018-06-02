@@ -70,6 +70,22 @@ def scrub_outliers(data,recurse = 5):
                 datum > np.mean(data) - 2*np.std(data)]
     return data
 
+def clean_duplicate_maxima(dist, indexes):
+    paired_indexes = []
+    count = 0
+    for i in set(indexes):
+        tmp = [np.inf,np.inf]
+        for j,k in zip(indexes, dist):
+            if i==j and k<tmp[1]:
+                tmp = [j,count]
+                count+=1
+            elif i==j:
+                count+=1
+            else:
+                pass
+        paired_indexes.append(tmp)
+    return paired_indexes
+
 
 def im_split(Image, splitstyle = "hsplit"):
     """
@@ -131,9 +147,9 @@ def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
     Delta_x,Delta_y = [],[]
     mytree = cKDTree(ch1_maxima)
     dist, indexes = mytree.query(ch2_maxima)
-    for i in range(len(ch2_maxima)):
-        x1, y1 = ch1_maxima[indexes[i]]
-        x2, y2 = ch2_maxima[i]
+    for i, j in clean_duplicate_maxima(dist, indexes):
+        x1, y1 = ch1_maxima[i]
+        x2, y2 = ch2_maxima[j]
         fit_ch1 = fit_routine(ch1, x1, y1, bbox)
         fit_ch2 = fit_routine(ch2, x2, y2, bbox)
         try:
@@ -201,9 +217,9 @@ def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
 
     mytree = cKDTree(ch1_maxima)
     dist, indexes = mytree.query(ch2_maxima)
-    for i in range(len(ch2_maxima)):
-        x1, y1 = ch1_maxima[indexes[i]]
-        x2, y2 = ch2_maxima[i]
+    for i, j in clean_duplicate_maxima(dist, indexes):
+        x1, y1 = ch1_maxima[i]
+        x2, y2 = ch2_maxima[j]
         tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
         plt.plot(x1,y1, color = tmp_color, marker = '+')
         plt.plot(x2+width,y2, color = tmp_color, marker = '+')

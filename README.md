@@ -8,6 +8,6 @@ Redding Lab toolbox tree
 
     ├── toolbox
         ├── alignment.py
-        └── point_fitting.py
-
+        ├── point_fitting.py
+        └── testdata
 ###### updates
