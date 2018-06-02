@@ -34,7 +34,7 @@ def FD_rule_bins(data):
     return np.arange(min(data), max(data) + opt_binwidth, opt_binwidth)
 
 
-def scrub_outliers(data,recurse = 5):
+def scrub_outliers(data,span = 2):
     """
     Removes outliers from data based on standard deviation.
     if data point is more than two standard deviations away from the mean
@@ -42,7 +42,7 @@ def scrub_outliers(data,recurse = 5):
     Process is iterative.
 
     :param data: 1D array or list of data points
-    :param recurse: Number of times to iterate over the process. Default is five iterations.
+    :param span: desired final value for max(data) - min(data).
 
     :return: New 1D list of data without outliers.
 
@@ -61,13 +61,12 @@ def scrub_outliers(data,recurse = 5):
         >>> plt.hist(scrubed_x,FD_rule_bins(x), fc = "g")
         >>> plt.show()
     """
-
-    recur_count = 0
-    while recur_count<recurse:
-        recur_count += 1
+    extent = max(data)-min(data)
+    while extent>span:
         data = [datum for datum in data if
-                datum < np.mean(data) + 2 and
-                datum > np.mean(data) - 2]
+                datum < np.mean(data) + 2*np.std(data) and
+                datum > np.mean(data) - 2*np.std(data)]
+        extent = max(data)-min(data)
     return data
 
 def clean_duplicate_maxima(dist, indexes):
