@@ -66,8 +66,8 @@ def scrub_outliers(data,recurse = 5):
     while recur_count<recurse:
         recur_count += 1
         data = [datum for datum in data if
-                datum < np.mean(data) + 2*np.std(data) and
-                datum > np.mean(data) - 2*np.std(data)]
+                datum < np.mean(data) + 2 and
+                datum > np.mean(data) - 2]
     return data
 
 def clean_duplicate_maxima(dist, indexes):
