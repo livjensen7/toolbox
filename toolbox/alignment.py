@@ -61,7 +61,7 @@ def scrub_outliers(data):
         >>> plt.hist(scrubed_x,FD_rule_bins(x), fc = "g")
         >>> plt.show()
     """
-    vals = np.histogram(data, al.FD_rule_bins(data))
+    vals = np.histogram(data, FD_rule_bins(data))
     sorted_counts = sorted(vals[0])
     binslist = [i for i in sorted_counts if i > .4 * sorted_counts[-1]]
 
