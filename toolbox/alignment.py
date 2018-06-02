@@ -34,7 +34,7 @@ def FD_rule_bins(data):
     return np.arange(min(data), max(data) + opt_binwidth, opt_binwidth)
 
 
-def scrub_outliers(data,span = 2):
+def scrub_outliers(data):
     """
     Removes outliers from data based on standard deviation.
     if data point is more than two standard deviations away from the mean
@@ -42,7 +42,7 @@ def scrub_outliers(data,span = 2):
     Process is iterative.
 
     :param data: 1D array or list of data points
-    :param span: desired final value for max(data) - min(data).
+    :param span: desired final value for max(data) - min(data). default is 1 pixel.
 
     :return: New 1D list of data without outliers.
 
@@ -61,13 +61,23 @@ def scrub_outliers(data,span = 2):
         >>> plt.hist(scrubed_x,FD_rule_bins(x), fc = "g")
         >>> plt.show()
     """
-    extent = max(data)-min(data)
-    while extent>span:
-        data = [datum for datum in data if
-                datum < np.mean(data) + 2*np.std(data) and
-                datum > np.mean(data) - 2*np.std(data)]
-        extent = max(data)-min(data)
-    return data
+    vals = np.histogram(data, al.FD_rule_bins(data))
+    sorted_counts = sorted(vals[0])
+    binslist = [i for i in sorted_counts if i > .4 * sorted_counts[-1]]
+
+    # -initial scrub using taking just highly populated bins
+    scrubbed_data = []
+    for i in binslist:
+        leftedge = vals[0].tolist().index(i)
+        for datum in data:
+            if datum < vals[1][leftedge + 1] and datum > vals[1][leftedge]:
+                scrubbed_data.append(datum)
+
+    # -final scrub using standard deviation
+    scrubbed_data = [datum for datum in scrubbed_data if
+                     datum < np.mean(scrubbed_data) + 2 * np.std(scrubbed_data) and
+                     datum > np.mean(scrubbed_data) - 2 * np.std(scrubbed_data)]
+    return scrubbed_data
 
 def clean_duplicate_maxima(dist, indexes):
     paired_indexes = []
