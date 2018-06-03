@@ -1,3 +1,19 @@
+#!/usr/bin/env python
+
+"""
+The point_fitting module contains functions used in measuring single particles.
+for more info see the `fitting guassians <https://github.com/ReddingLab/Learning/blob/master/image-analysis-basics/fitting-gaussians.ipynb/>`_
+or the `finding local maxima <https://github.com/ReddingLab/Learning/blob/master/image-analysis-basics/finding-local-maxima.ipynb/>`_
+tutorials.
+
+"""
+
+__all__ = ['two_d_gaussian', 'find_maxima', 'fit_routine']
+__version__ = '0.0.1'
+__author__ = 'Sy Redding'
+
+
+
 import numpy as np
 import skimage.filters as skim
 import scipy.ndimage as ndimage
@@ -22,9 +38,9 @@ def two_d_gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset)
 
     :Example:
         >>> import numpy as np
-        >>> import toolbox.point_fitting as pt
+        >>> from toolbox.point_fitting import two_d_gaussian
         >>> x,y = np.linspace(0,5,6), np.linspace(0,5,6)
-        >>> pt.two_d_gaussian((x,y),1,2.5,2.5,1,1,0,.2)
+        >>> two_d_gaussian((x,y),1,2.5,2.5,1,1,0,.2)
         array([0.20193045, 0.30539922, 0.97880078, 0.97880078, 0.30539922,0.20193045])
     """
     (x,y) = span
@@ -39,11 +55,11 @@ def two_d_gaussian(span, amplitude, mu_x, mu_y, sigma_x, sigma_y, theta, offset)
 
 def find_maxima(image,size,threshold_method = "threshold_otsu"):
     """
-    Locates maxima in an image.
+    Locates maxima in an image. See `here <https://github.com/ReddingLab/Learning/blob/master/image-analysis-basics/finding-local-maxima.ipynb/>`_
 
     :param image: 2-dimensional image array.
     :param size: int, size of the maxima and minimum filters used
-    :param threshold_method: string, type of thresholding filter used. Accepts any filter in the skimmage.filters module. Default is otsu's method
+    :param threshold_method: string, type of thresholding filter used. Accepts any filter in the ``skimmage.filters`` module. Default is "otsu's method"
 
     :return: 1D array of [(x,y),...] defining the locations of each maximum
 
@@ -72,12 +88,13 @@ def find_maxima(image,size,threshold_method = "threshold_otsu"):
 
 def fit_routine(Image, x, y, bbox):
     """
-    Fits a 2D gaussian function to 2D image array.
+    Fits a 2D gaussian function to 2D image array. "x", "y", and "bbox" define an ROI fit by ``two_d_gaussian`` using
+    ``scipy.optimaize.curve_fit``
 
     :param Image: 2D array containing ROI to be fit
     :param x: center of ROI in x
     :param x: center of ROI in y
-    :param bbox: length of the ROI on a side. if even, rounds up to next odd integer
+    :param bbox: side-length of the ROI. if even, rounds up to next odd integer
 
     :return: 1D array of optimal parameters from gaussian fit.
     :return: ``None``

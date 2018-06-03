@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+
+"""
+The alignment module contains functions used in aligning two channel data.
+See our `walkthrough <https://github.com/ReddingLab/Learning/blob/master/image-analysis-basics/Image-alignment-with-toolbox.ipynb/>`_
+of the alignment module's usage.
+"""
+
+__all__ = ['FD_rule_bins', 'scrub_outliers', 'im_split',
+           'get_offset_distribution', 'find_global_offset',
+           'plot_assigned_maxima','align_by_offset','overlay']
+__version__ = '0.0.1'
+__author__ = 'Sy Redding'
+
 import numpy as np
 import random as ra
 import matplotlib.pyplot as plt
@@ -36,15 +50,13 @@ def FD_rule_bins(data):
 
 def scrub_outliers(data):
     """
-    Removes outliers from data based on standard deviation.
-    if data point is more than two standard deviations away from the mean
-    it is removed.
-    Process is iterative.
+    Removes outliers from data. Works in two steps:
+        * First, data is binned using ``FD_rule_bins`` and only the most highly populated bins are retained
+        * Second, any datum more than two standard deviations away from the mean are filtered out
 
     :param data: 1D array or list of data points
-    :param span: desired final value for max(data) - min(data). default is 1 pixel.
 
-    :return: New 1D list of data without outliers.
+    :return: Filtered result, 1D array
 
     :Example:
 
@@ -53,7 +65,7 @@ def scrub_outliers(data):
         >>> x = np.concatenate((np.random.normal(size=200),np.random.uniform(-10,10,size=20)))
         >>> scrubed_x = scrub_outliers(x)
         >>> len(x),len(scrubed_x)
-        (220, 196)
+        (220, 179)
         >>> import matplotlib.pyplot as plt
         >>> from toolbox.alignment import FD_rule_bins
         >>> plt.figure()
@@ -98,57 +110,55 @@ def clean_duplicate_maxima(dist, indexes):
 
 def im_split(Image, splitstyle = "hsplit"):
     """
-        Image passed to this function is split into two channels based on split style.
-        ***note*** micromanager images and numpy arrays are indexed opposite of one another.
+    Image passed to this function is split into two channels based on "splitstyle".
+    ***note*** micromanager images and numpy arrays are indexed opposite of one another.
 
-        :param Image: 2D image array
-        :param splitstyle: *string*, accepts "hsplit", "vsplit". Default is "hsplit"
+    :param Image: 2D image array
+    :param splitstyle: str, accepts "hsplit", "vsplit". Default is "hsplit"
 
-        :return: Two subarrays of Image split along specified axis.
+    :return: The two subarrays of Image split along specified axis.
 
-        :Example:
+    :Example:
 
-            >>> import toolbox.alignment as al
-            >>> import toolbox.testdata as test
-            >>> im = test.image_stack()[0]
-            >>> ch1,ch2 = al.im_split(im)
-            >>> ch1.shape,ch2.shape
-            ((512, 256), (512, 256))
-            >>> ch1,ch2 = al.im_split(im,"vsplit")
-            >>> ch1.shape,ch2.shape
-            ((256, 512), (256, 512))
-        """
+        >>> from toolbox.alignment import im_split
+        >>> import toolbox.testdata as test
+        >>> im = test.image_stack()[0]
+        >>> ch1,ch2 = im_split(im)
+        >>> ch1.shape,ch2.shape
+        ((512, 256), (512, 256))
+        >>> ch1,ch2 = im_split(im,"vsplit")
+        >>> ch1.shape,ch2.shape
+        ((256, 512), (256, 512))
+    """
     return getattr(np, splitstyle)(Image, 2)[0],getattr(np, splitstyle)(Image, 2)[1]
 
 
 
 def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
     """
-    Image passed to this function should be 2-channel data.
     This function in order:
         * splits the image into channels
-        * locates and fits all of the foci in each channel
-        * pairs up associated foci from each channel and determines their x- and y- offsets
+        * locates and fits all of the points in each channel
+        * pairs up associated points from each channel, uses cDKTree
+        * and determines their offset
 
     :param Image: 2D image array
-    :param bbox: int, size of ROI around each point to apply gaussian fit. Default is 9.
-    :param splitstyle: string, accepts "hsplit", "vsplit". Default is "hsplit"
-    :param fsize: int, size of average filters used in maxima determination. Default is 10.
+    :param bbox: int, passed to ``point_fitting.fit_routine``, size of ROI around each point to apply gaussian fit. Default is 9.
+    :param splitstyle: string, passed to ``im_split``; accepts "hsplit", "vsplit". Default is "hsplit"
+    :param fsize: int, passed to ``point_fitting.find_maxima``, size of average filters used in maxima determination. Default is 10.
 
-    :return: Two lists containing the x- and y- offsets of each corresponding pair of foci.
+    :return: Two lists containing all of the measured x- and y- offsets
 
     :Example:
 
-        >>> import toolbox.alignment as al
+        >>> from toolbox.alignment import get_offset_distribution
         >>> import toolbox.testdata as test
         >>> import matplotlib.pyplot as plt
         >>> import numpy as np
         >>> im = test.image_stack()[0]
-        >>> x_dist,y_dist = al.get_offset_distribution(im)
-        >>> print(np.mean(x_dist),np.mean(x_dist))
-        3.7626076029453333 3.7626076029453333
-        >>> plt.hist(x_dist),plt.hist(y_dist)
-        >>> plt.show()
+        >>> x_dist,y_dist = get_offset_distribution(im)
+        >>> print(np.mean(x_dist),np.mean(y_dist))
+        -1.9008888233326608 -2.042675546813981
     """
     ch1,ch2 = im_split(Image,splitstyle)
     ch1_maxima = find_maxima(ch1,fsize)
@@ -171,22 +181,22 @@ def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
 
 def find_global_offset(im_list, bbox = 9,splitstyle = "hsplit",fsize = 10):
     """
-    finds the optimal x-shift and y-shift of the data.
+    This function finds the optimal x-offset and y-offset of the data using ``scrub_outliers`` to filter
+    the data collected from ``get_offset_distribution``. The filtered data are then fit using ``scipy.stats.skewnorm``
 
-    :param im_list: 1D list of image arrays used in determination of the offset
-    :param bbox: int, size of ROI around each point to apply gaussian fit. Default is 9.
-    :param splitstyle: string, accepts "hsplit", "vsplit". Default is "hsplit"
-    :param fsize: int, size of average filters used in maxima determination. Default is 10.
+    :param im_list: 1D list of image arrays to be used in determination of the offset
+    :param bbox: int, passed to ``point_fitting.fit_routine``, size of ROI around each point to apply gaussian fit. Default is 9.
+    :param splitstyle: string, passed to ``im_split``; accepts "hsplit", "vsplit". Default is "hsplit"
+    :param fsize: int, passed to ``point_fitting.find_maxima``, size of average filters used in maxima determination. Default is 10.
 
-    :return: Mean x and y shift values to align all images best fit.
+    :return: Mean x- and y-offset values.
 
     :Example:
-
-        >>> import toolbox.alignment as al
+        >>> from toolbox.alignment import find_global_offset
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()
-        >>> print(al.find_global_offset(im))
-        (5.3995077855937135, -2.5451652701227854)
+        >>> print(find_global_offset(im))
+        (5.624042070667237, -2.651128775580636)
     """
     pooled_x, pooled_y = [], []
     for im in im_list:
@@ -200,20 +210,21 @@ def find_global_offset(im_list, bbox = 9,splitstyle = "hsplit",fsize = 10):
 
 def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
     """
-    plots the assigned maxima from each channel. Uses cKDTree
+    This function spits out a matplotlib plot with lines drawn between each of the assigned pairs of maxima.
+    The purpose of this function is more for a sanity check than anything useful.
 
     :param Image: 2D image array
-    :param splitstyle: string, accepts "hsplit", "vsplit". Default is "hsplit"
-    :param fsize: int, size of average filters used in maxima determination. Default is 10.
+    :param splitstyle: string, passed to ``im_split``; accepts "hsplit", "vsplit". Default is "hsplit"
+    :param fsize: int, passed to ``point_fitting.find_maxima``, size of average filters used in maxima determination. Default is 10.
 
-    :return: plot of assigned points.
+    :return: fancy plot of assigned points.
 
     :Example:
 
-        >>> import toolbox.alignment as al
+        >>> from toolbox.alignment import plot_assigned_maxima
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()[0]
-        >>> al.plot_assigned_maxima(im)
+        >>> plot_assigned_maxima(im)
     """
     ch1, ch2 = im_split(Image, splitstyle)
     ch1_maxima = find_maxima(ch1, fsize)
@@ -235,45 +246,63 @@ def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
         plt.plot([x1,x2+width],[y1,y2], color = tmp_color)
     plt.show()
 
-def align_by_offset(Image, shift_x, shift_y, shift_channel="right"):
+
+def align_by_offset(Image, shift_x, shift_y, splitstyle = "hsplit", shift_channel = 1):
     """
-    shifts left or right channel to alignment.
+    This function shifts one channel of the array based supplied offset values. Retains the single image
+    structure.
 
     :param Image: 2D image array
-    :param shift_x: float, channel shift in x
-    :param shift_y: float, channel shift in x
+    :param shift_x: float, offset in x
+    :param shift_y: float, offset in y
+    :param splitstyle: string, passed to ``im_split``; accepts "hsplit", "vsplit". Default is "hsplit"
+    :param shift_channel: int, which channel to shift by offsets, default is channel 1.
 
     :return: 2D image array of aligned image
 
     :Example:
-
-        >>> import toolbox.alignment as al
+        >>> from toolbox.alignment import find_global_offset, align_by_offset
         >>> import toolbox.testdata as test
+        >>> import matplotlib.pyplot as plt
         >>> im = test.image_stack()
-        >>> Dx,Dy = al.find_global_offset(im, 8,3,7)
-        >>> new_image = al.align_by_offset(im[0],Dx,Dy)
+        >>> dx,dy = find_global_offset(im)
+        >>> new_image = align_by_offset(im[0],dx,dy)
+        >>> plt.imshow(new_image),plt.show()
     """
-    left_channel = np.hsplit(Image, 2)[0]
-    right_channel = np.hsplit(Image, 2)[1]
-    if shift_channel == "right":
-        new_coords = warp_coords(lambda xy: xy - np.array([shift_x, shift_y]), right_channel.shape)
-        warped_channel = map_coordinates(right_channel, new_coords)
-        aligned_image = np.concatenate((left_channel, warped_channel), axis=1)
-    elif shift_channel == "left":
-        new_coords = warp_coords(lambda xy: xy + np.array([shift_x, shift_y]), left_channel.shape)
-        warped_channel = map_coordinates(left_channel, new_coords)
-        aligned_image = np.concatenate((warped_channel, right_channel), axis=1)
+    if splitstyle == "vsplit":
+        ch2, ch1 = im_split(Image, splitstyle)
+    else:
+        ch1, ch2 = im_split(Image, splitstyle)
+    if shift_channel == 1:
+        new_coords = warp_coords(lambda xy: xy - np.array([shift_x, shift_y]), ch2.shape)
+        warped_channel = map_coordinates(ch2, new_coords)
+        aligned_image = np.concatenate((ch1, warped_channel), axis=1)
+    else:
+        new_coords = warp_coords(lambda xy: xy + np.array([shift_x, shift_y]), ch1.shape)
+        warped_channel = map_coordinates(ch1, new_coords)
+        aligned_image = np.concatenate((warped_channel, ch2), axis=1)
     return aligned_image
 
 
 def overlay(Image, low_depth = False, rot = True,invert = False):
     """
-    This...
+    Overlays the two channels derived from Image. Converts Image to an RGB array, with one channel colored magenta and the other green.
+
     :param Image: 2D image array
     :param low_depth: bool, if True, output is 8 bit image
     :param rot: bool, if True, image is rotated 90 degrees
-    :param invert: bool, if True, inverts the channel color assignment to magenta on the right.
-    :return: 2D RGB image
+    :param invert: bool, if True, inverts the channel color assignment.
+    :return: RGB image
+
+    :Example:
+        >>> from toolbox.alignment import overlay
+        >>> import toolbox.testdata as test
+        >>> import matplotlib.pyplot as plt
+        >>> im = test.image_stack()
+        >>> dx,dy = find_global_offset(im)
+        >>> aligned_image = align_by_offset(im[0],dx,dy)
+        >>> overlayed = overlay(aligned_image)
+        >>> plt.imshow(overlayed),plt.show()
     """
     if not invert:
         ch1,ch2 = im_split(Image)
