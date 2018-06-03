@@ -10,4 +10,6 @@ Redding Lab toolbox tree
         ├── alignment.py
         ├── point_fitting.py
         └── testdata
+        
+Documentation https://reddinglab-toolbox.readthedocs.io/en/latest/
 ###### updates
