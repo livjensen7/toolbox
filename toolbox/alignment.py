@@ -284,15 +284,14 @@ def align_by_offset(Image, shift_x, shift_y, splitstyle = "hsplit", shift_channe
     return aligned_image
 
 
-def overlay(Image, low_depth = False, rot = True,invert = False):
+def overlay(Image, rot = True,invert = False):
     """
-    Overlays the two channels derived from Image. Converts Image to an RGB array, with one channel colored magenta and the other green.
+    Overlays the two channels derived from Image. Converts Image to an 8-bit RGB array, with one channel colored magenta and the other green.
 
     :param Image: 2D image array
-    :param low_depth: bool, if True, output is 8 bit image
     :param rot: bool, if True, image is rotated 90 degrees
     :param invert: bool, if True, inverts the channel color assignment.
-    :return: RGB image
+    :return: 8-bit RGB image
 
     :Example:
         >>> from toolbox.alignment import overlay
@@ -318,12 +317,9 @@ def overlay(Image, low_depth = False, rot = True,invert = False):
             red[x, y] = ch1[x,y]/ch1_max
             green[x, y] = ch2[x,y]/ch2_max
     rgb_stack = np.dstack((red, green, red))
-    if not low_depth:
-        rgb_stack = 65535 * rgb_stack
-        rgb_stack = rgb_stack.astype(np.uint16)
-    else:
-        rgb_stack = 255 * rgb_stack
-        rgb_stack = rgb_stack.astype(np.uint8)
     if rot:
         rgb_stack = rotate(rgb_stack, 90, resize=True)
+
+    rgb_stack = 255 * rgb_stack
+    rgb_stack = rgb_stack.astype(np.uint8)
     return rgb_stack
