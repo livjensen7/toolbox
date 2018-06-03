@@ -276,9 +276,9 @@ def overlay(Image, low_depth = False, rot = True,invert = False):
     :return: 2D RGB image
     """
     if not invert:
-        ch1,ch2 = al.im_split(Image)
+        ch1,ch2 = im_split(Image)
     else:
-        ch2,ch1 = al.im_split(Image)
+        ch2,ch1 = im_split(Image)
     ch1_max = ch1.max()
     ch2_max = ch2.max()
     shape = ch1.shape
