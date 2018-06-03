@@ -5,7 +5,7 @@ from toolbox.point_fitting import find_maxima, fit_routine
 from scipy.stats import skewnorm
 from scipy.spatial import cKDTree
 from scipy.ndimage import map_coordinates
-from skimage.transform import warp_coords
+from skimage.transform import warp_coords,rotate
 
 
 
@@ -85,7 +85,7 @@ def clean_duplicate_maxima(dist, indexes):
     for i in set(indexes):
         tmp = [np.inf,np.inf]
         for j,k in zip(indexes, dist):
-            if i==j and k<tmp[1]:
+            if i==j and k<abs(tmp[1]):
                 tmp = [j,count]
                 count+=1
             elif i==j:
@@ -264,3 +264,37 @@ def align_by_offset(Image, shift_x, shift_y, shift_channel="right"):
         warped_channel = map_coordinates(left_channel, new_coords)
         aligned_image = np.concatenate((warped_channel, right_channel), axis=1)
     return aligned_image
+
+
+def overlay(Image, low_depth = False, rot = True,invert = False):
+    """
+    This...
+    :param Image: 2D image array
+    :param low_depth: bool, if True, output is 8 bit image
+    :param rot: bool, if True, image is rotated 90 degrees
+    :param invert: bool, if True, inverts the channel color assignment to magenta on the right.
+    :return: 2D RGB image
+    """
+    if not invert:
+        ch1,ch2 = al.im_split(Image)
+    else:
+        ch2,ch1 = al.im_split(Image)
+    ch1_max = ch1.max()
+    ch2_max = ch2.max()
+    shape = ch1.shape
+    red = np.zeros(shape)
+    green = np.zeros(shape)
+    for x in range(0, shape[0]):
+        for y in range(0, shape[1]):
+            red[x, y] = ch1[x,y]/ch1_max
+            green[x, y] = ch2[x,y]/ch2_max
+    rgb_stack = np.dstack((red, green, red))
+    if not low_depth:
+        rgb_stack = 65535 * rgb_stack
+        rgb_stack = rgb_stack.astype(np.uint16)
+    else:
+        rgb_stack = 255 * rgb_stack
+        rgb_stack = rgb_stack.astype(np.uint8)
+    if rot:
+        rgb_stack = rotate(rgb_stack, 90, resize=True)
+    return rgb_stack
