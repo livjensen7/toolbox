@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# alignment_tools documentation build configuration file, created by
+# toolbox documentation build configuration file, created by
 # sphinx-quickstart on Sun May 27 17:40:25 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -43,7 +43,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'toolbox'
+master_doc = 'index'
 
 # General information about the project.
 project = 'toolbox'
