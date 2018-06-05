@@ -318,7 +318,7 @@ def overlay(Image, rot = True,invert = False):
             green[x, y] = ch2[x,y]/ch2_max
     rgb_stack = np.dstack((red, green, red))
     if rot:
-        rgb_stack = rotate(rgb_stack, 90, resize=True)
+        rgb_stack = rotate(rgb_stack, -90, resize=True)
 
     rgb_stack = 255 * rgb_stack
     rgb_stack = rgb_stack.astype(np.uint8)
