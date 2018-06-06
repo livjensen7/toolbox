@@ -132,7 +132,7 @@ def im_split(Image, splitstyle = "hsplit"):
     return getattr(np, splitstyle)(Image, 2)[0],getattr(np, splitstyle)(Image, 2)[1]
 
 
-def get_offset_distribution(Image, bbox = 9, splitstyle="hsplit", fsize=10):
+def get_offset_distribution(Image, bbox=9, splitstyle="hsplit", fsize=10):
     """
     This function in order:
         * splits the image into channels
@@ -175,7 +175,7 @@ def get_offset_distribution(Image, bbox = 9, splitstyle="hsplit", fsize=10):
             
         except TypeError:
             pass
-    return Delta_x, Delta_y, "thisislocal"
+    return(Delta_x, Delta_y)
 
 
 def find_global_offset(im_list, bbox=9, splitstyle="hsplit", fsize=10):
