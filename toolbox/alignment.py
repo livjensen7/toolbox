@@ -22,8 +22,6 @@ from scipy.ndimage import map_coordinates
 from skimage.transform import warp_coords,rotate
 
 
-
-
 def FD_rule_bins(data):
     """
     Finds the optimal spacing of histogram bins based on the
@@ -64,13 +62,13 @@ def scrub_outliers(data):
         >>> from toolbox.alignment import scrub_outliers
         >>> x = np.concatenate((np.random.normal(size=200),np.random.uniform(-10,10,size=20)))
         >>> scrubed_x = scrub_outliers(x)
-        >>> len(x),len(scrubed_x)
+        >>> len(x), len(scrubed_x)
         (220, 179)
         >>> import matplotlib.pyplot as plt
         >>> from toolbox.alignment import FD_rule_bins
         >>> plt.figure()
-        >>> plt.hist(x,FD_rule_bins(x),fc = "m")
-        >>> plt.hist(scrubed_x,FD_rule_bins(x), fc = "g")
+        >>> plt.hist(x, FD_rule_bins(x), fc = "m")
+        >>> plt.hist(scrubed_x, FD_rule_bins(x), fc = "g")
         >>> plt.show()
     """
     vals = np.histogram(data, FD_rule_bins(data))
@@ -91,17 +89,18 @@ def scrub_outliers(data):
                      datum > np.mean(scrubbed_data) - 2 * np.std(scrubbed_data)]
     return scrubbed_data
 
+
 def clean_duplicate_maxima(dist, indexes):
     paired_indexes = []
     count = 0
     for i in set(indexes):
         tmp = [np.inf,np.inf]
         for j,k in zip(indexes, dist):
-            if i==j and k<abs(tmp[1]):
+            if i == j and k < abs(tmp[1]):
                 tmp = [j,count]
-                count+=1
-            elif i==j:
-                count+=1
+                count += 1
+            elif i == j:
+                count += 1
             else:
                 pass
         paired_indexes.append(tmp)
@@ -123,18 +122,17 @@ def im_split(Image, splitstyle = "hsplit"):
         >>> from toolbox.alignment import im_split
         >>> import toolbox.testdata as test
         >>> im = test.image_stack()[0]
-        >>> ch1,ch2 = im_split(im)
-        >>> ch1.shape,ch2.shape
+        >>> ch1, ch2 = im_split(im)
+        >>> ch1.shape, ch2.shape
         ((512, 256), (512, 256))
-        >>> ch1,ch2 = im_split(im,"vsplit")
-        >>> ch1.shape,ch2.shape
+        >>> ch1, ch2 = im_split(im, "vsplit")
+        >>> ch1.shape, ch2.shape
         ((256, 512), (256, 512))
     """
     return getattr(np, splitstyle)(Image, 2)[0],getattr(np, splitstyle)(Image, 2)[1]
 
 
-
-def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
+def get_offset_distribution(Image, bbox = 9, splitstyle="hsplit", fsize=10):
     """
     This function in order:
         * splits the image into channels
@@ -156,14 +154,14 @@ def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
         >>> import matplotlib.pyplot as plt
         >>> import numpy as np
         >>> im = test.image_stack()[0]
-        >>> x_dist,y_dist = get_offset_distribution(im)
-        >>> print(np.mean(x_dist),np.mean(y_dist))
+        >>> x_dist, y_dist = get_offset_distribution(im)
+        >>> print(np.mean(x_dist), np.mean(y_dist))
         -1.9008888233326608 -2.042675546813981
     """
-    ch1,ch2 = im_split(Image,splitstyle)
-    ch1_maxima = find_maxima(ch1,fsize)
-    ch2_maxima = find_maxima(ch2,fsize)
-    Delta_x,Delta_y = [],[]
+    ch1, ch2 = im_split(Image, splitstyle)
+    ch1_maxima = find_maxima(ch1, fsize)
+    ch2_maxima = find_maxima(ch2, fsize)
+    Delta_x, Delta_y = [], []
     mytree = cKDTree(ch1_maxima)
     dist, indexes = mytree.query(ch2_maxima)
     for i, j in clean_duplicate_maxima(dist, indexes):
@@ -177,9 +175,10 @@ def get_offset_distribution(Image,bbox = 9,splitstyle = "hsplit",fsize = 10):
             
         except TypeError:
             pass
-    return(Delta_x,Delta_y)
+    return Delta_x, Delta_y
 
-def find_global_offset(im_list, bbox = 9,splitstyle = "hsplit",fsize = 10):
+
+def find_global_offset(im_list, bbox=9, splitstyle="hsplit", fsize=10):
     """
     This function finds the optimal x-offset and y-offset of the data using ``scrub_outliers`` to filter
     the data collected from ``get_offset_distribution``. The filtered data are then fit using ``scipy.stats.skewnorm``
@@ -208,7 +207,7 @@ def find_global_offset(im_list, bbox = 9,splitstyle = "hsplit",fsize = 10):
     return mu1, mu2
 
 
-def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
+def plot_assigned_maxima(Image, splitstyle="hsplit", fsize=10):
     """
     This function spits out a matplotlib plot with lines drawn between each of the assigned pairs of maxima.
     The purpose of this function is more for a sanity check than anything useful.
@@ -232,7 +231,7 @@ def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
     width = ch2.shape[1]
     fig = plt.figure(figsize=(Image.shape[0]/64,Image.shape[1]/64))
     plt.axis('off')
-    plt.imshow(Image, cmap = "binary_r")
+    plt.imshow(Image, cmap="binary_r")
     plt.title("Assigned matching points")
 
     mytree = cKDTree(ch1_maxima)
@@ -241,13 +240,13 @@ def plot_assigned_maxima(Image,splitstyle = "hsplit",fsize = 10):
         x1, y1 = ch1_maxima[i]
         x2, y2 = ch2_maxima[j]
         tmp_color = (ra.uniform(0, 1), ra.uniform(0, 1), ra.uniform(0, 1))
-        plt.plot(x1,y1, color = tmp_color, marker = '+')
-        plt.plot(x2+width,y2, color = tmp_color, marker = '+')
-        plt.plot([x1,x2+width],[y1,y2], color = tmp_color)
+        plt.plot(x1, y1, color=tmp_color, marker='+')
+        plt.plot(x2+width, y2, color=tmp_color, marker='+')
+        plt.plot([x1, x2+width], [y1, y2], color=tmp_color)
     plt.show()
 
 
-def align_by_offset(Image, shift_x, shift_y, splitstyle = "hsplit", shift_channel = 1):
+def align_by_offset(Image, shift_x, shift_y, splitstyle="hsplit", shift_channel = 1):
     """
     This function shifts one channel of the array based supplied offset values. Retains the single image
     structure.
@@ -265,9 +264,9 @@ def align_by_offset(Image, shift_x, shift_y, splitstyle = "hsplit", shift_channe
         >>> import toolbox.testdata as test
         >>> import matplotlib.pyplot as plt
         >>> im = test.image_stack()
-        >>> dx,dy = find_global_offset(im)
-        >>> new_image = align_by_offset(im[0],dx,dy)
-        >>> plt.imshow(new_image),plt.show()
+        >>> dx, dy = find_global_offset(im)
+        >>> new_image = align_by_offset(im[0], dx, dy)
+        >>> plt.imshow(new_image), plt.show()
     """
     if splitstyle == "vsplit":
         ch2, ch1 = im_split(Image, splitstyle)
@@ -284,7 +283,7 @@ def align_by_offset(Image, shift_x, shift_y, splitstyle = "hsplit", shift_channe
     return aligned_image
 
 
-def overlay(Image, rot = True,invert = False):
+def overlay(Image, rot=True, invert=False):
     """
     Overlays the two channels derived from Image. Converts Image to an 8-bit RGB array, with one channel colored magenta and the other green.
 
@@ -298,15 +297,15 @@ def overlay(Image, rot = True,invert = False):
         >>> import toolbox.testdata as test
         >>> import matplotlib.pyplot as plt
         >>> im = test.image_stack()
-        >>> dx,dy = find_global_offset(im)
-        >>> aligned_image = align_by_offset(im[0],dx,dy)
+        >>> dx, dy = find_global_offset(im)
+        >>> aligned_image = align_by_offset(im[0], dx, dy)
         >>> overlayed = overlay(aligned_image)
-        >>> plt.imshow(overlayed),plt.show()
+        >>> plt.imshow(overlayed), plt.show()
     """
     if not invert:
-        ch1,ch2 = im_split(Image)
+        ch1, ch2 = im_split(Image)
     else:
-        ch2,ch1 = im_split(Image)
+        ch2, ch1 = im_split(Image)
     ch1_max = ch1.max()
     ch2_max = ch2.max()
     shape = ch1.shape
@@ -314,12 +313,12 @@ def overlay(Image, rot = True,invert = False):
     green = np.zeros(shape)
     for x in range(0, shape[0]):
         for y in range(0, shape[1]):
-            red[x, y] = ch1[x,y]/ch1_max
-            green[x, y] = ch2[x,y]/ch2_max
+            red[x, y] = ch1[x, y]/ch1_max
+            green[x, y] = ch2[x, y]/ch2_max
     rgb_stack = np.dstack((red, green, red))
     if rot:
         rgb_stack = rotate(rgb_stack, -90, resize=True)
 
-    rgb_stack = 255 * rgb_stack
+    rgb_stack *= 255
     rgb_stack = rgb_stack.astype(np.uint8)
     return rgb_stack
