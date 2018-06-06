@@ -20,6 +20,8 @@ from scipy.stats import skewnorm
 from scipy.spatial import cKDTree
 from scipy.ndimage import map_coordinates
 from skimage.transform import warp_coords,rotate
+from PIL import Image
+import os
 
 
 def FD_rule_bins(data):
@@ -73,20 +75,21 @@ def scrub_outliers(data):
     """
     vals = np.histogram(data, FD_rule_bins(data))
     sorted_counts = sorted(vals[0])
-    binslist = [i for i in sorted_counts if i > .9 * sorted_counts[-1]]
-
+    binslist = [i for i in sorted_counts if i > .6 * sorted_counts[-1]]
     # -initial scrub using taking just highly populated bins
     scrubbed_data = []
     for i in binslist:
         leftedge = vals[0].tolist().index(i)
         for datum in data:
-            if datum < vals[1][leftedge + 1] and datum > vals[1][leftedge]:
+            if datum < vals[1][leftedge + 1] and datum >= vals[1][leftedge]:
                 scrubbed_data.append(datum)
-
     # -final scrub using standard deviation
     scrubbed_data = [datum for datum in scrubbed_data if
                      datum < np.mean(scrubbed_data) + 2 * np.std(scrubbed_data) and
-                     datum > np.mean(scrubbed_data) - 2 * np.std(scrubbed_data)]
+                     datum > np.mean(scrubbed_data) - 2 * np.std(scrubbed_data) and
+                     # inserted median filter below
+                     np.median(scrubbed_data) - 2 < datum < np.median(scrubbed_data) + 2]
+    print(scrubbed_data, "\n")
     return scrubbed_data
 
 
@@ -322,3 +325,30 @@ def overlay(Image, rot=True, invert=False):
     rgb_stack *= 255
     rgb_stack = rgb_stack.astype(np.uint8)
     return rgb_stack
+
+
+def main():
+    mypath = "/Volumes/LIVDATA/180605Tetraspec/"
+    filelist = os.listdir(mypath)
+    imlist = []
+    # counter = 0
+    for x in filelist:
+        if x.startswith("MED"):
+            with Image.open(mypath + x) as image:
+                imarray = np.array(image)
+            imlist.append(imarray)
+            # plt.hist(get_offset_distribution(imarray)[0])
+            print(len(get_offset_distribution(imarray)[0]))
+            # plot_assigned_maxima(imarray)
+            # print(counter)
+            # counter += 1
+    plt.show()
+
+    # imlist = [imarray]
+    dx, dy = find_global_offset(imlist)
+    print(dx, dy)
+    alignedimage = align_by_offset(imlist[0], dx, dy)
+    overlayed = overlay(alignedimage)
+    plt.imshow(overlayed), plt.show()
+
+main()
