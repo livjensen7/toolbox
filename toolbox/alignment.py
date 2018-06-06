@@ -73,7 +73,7 @@ def scrub_outliers(data):
     """
     vals = np.histogram(data, FD_rule_bins(data))
     sorted_counts = sorted(vals[0])
-    binslist = [i for i in sorted_counts if i > .4 * sorted_counts[-1]]
+    binslist = [i for i in sorted_counts if i > .9 * sorted_counts[-1]]
 
     # -initial scrub using taking just highly populated bins
     scrubbed_data = []
@@ -175,7 +175,7 @@ def get_offset_distribution(Image, bbox = 9, splitstyle="hsplit", fsize=10):
             
         except TypeError:
             pass
-    return Delta_x, Delta_y
+    return Delta_x, Delta_y, "thisislocal"
 
 
 def find_global_offset(im_list, bbox=9, splitstyle="hsplit", fsize=10):
