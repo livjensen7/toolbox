@@ -10,7 +10,7 @@ __all__ = ['FD_rule_bins', 'scrub_outliers', 'im_split',
            'get_offset_distribution', 'find_global_offset',
            'plot_assigned_maxima','align_by_offset','overlay']
 __version__ = '0.0.1'
-__author__ = 'Sy Redding'
+__author__ = 'Sy Redding and Liv Jensen'
 
 import numpy as np
 import random as ra
@@ -89,7 +89,7 @@ def scrub_outliers(data):
                      datum > np.mean(scrubbed_data) - 2 * np.std(scrubbed_data) and
                      # inserted median filter below
                      np.median(scrubbed_data) - 2 < datum < np.median(scrubbed_data) + 2]
-    print(scrubbed_data, "\n")
+    #print(scrubbed_data, "\n")
     return scrubbed_data
 
 
@@ -181,10 +181,12 @@ def get_offset_distribution(Image, bbox=9, splitstyle="hsplit", fsize=10):
     return(Delta_x, Delta_y)
 
 
-def find_global_offset(im_list, bbox=9, splitstyle="hsplit", fsize=10):
+def find_global_offset(im_list, bbox=9, splitstyle="hsplit", fsize=10
+                       , scale = 0.5, binning = 1):
     """
     This function finds the optimal x-offset and y-offset of the data using ``scrub_outliers`` to filter
     the data collected from ``get_offset_distribution``. The filtered data are then fit using ``scipy.stats.skewnorm``
+
 
     :param im_list: 1D list of image arrays to be used in determination of the offset
     :param bbox: int, passed to ``point_fitting.fit_routine``, size of ROI around each point to apply gaussian fit. Default is 9.
@@ -203,8 +205,8 @@ def find_global_offset(im_list, bbox=9, splitstyle="hsplit", fsize=10):
     pooled_x, pooled_y = [], []
     for im in im_list:
         xdist, ydist = get_offset_distribution(im, bbox, splitstyle, fsize)
-        pooled_x += scrub_outliers(xdist)
-        pooled_y += scrub_outliers(ydist)
+        pooled_x += pinhole_filter(xdist, scale, binning)
+        pooled_y += pinhole_filter(ydist, scale, binning)
     skew, mu1, sigma1 = skewnorm.fit(pooled_x)
     skew, mu2, sigma2 = skewnorm.fit(pooled_y)
     return mu1, mu2
@@ -232,7 +234,7 @@ def plot_assigned_maxima(Image, splitstyle="hsplit", fsize=10):
     ch1_maxima = find_maxima(ch1, fsize)
     ch2_maxima = find_maxima(ch2, fsize)
     width = ch2.shape[1]
-    fig = plt.figure(figsize=(Image.shape[0]/64,Image.shape[1]/64))
+    plt.figure(figsize=(Image.shape[0]/64,Image.shape[1]/64))
     plt.axis('off')
     plt.imshow(Image, cmap="binary_r")
     plt.title("Assigned matching points")
@@ -327,28 +329,91 @@ def overlay(Image, rot=True, invert=False):
     return rgb_stack
 
 
-def main():
-    mypath = "/Volumes/LIVDATA/180605Tetraspec/"
-    filelist = os.listdir(mypath)
-    imlist = []
-    # counter = 0
-    for x in filelist:
-        if x.startswith("MED"):
-            with Image.open(mypath + x) as image:
-                imarray = np.array(image)
-            imlist.append(imarray)
-            # plt.hist(get_offset_distribution(imarray)[0])
-            print(len(get_offset_distribution(imarray)[0]))
-            # plot_assigned_maxima(imarray)
-            # print(counter)
-            # counter += 1
+
+def pinhole_filter(data,scale = 0.5,binning = 1):
+    """
+    :param data: array
+    :param scale: float, threshold relative maximum
+    :param binning: float, edge to edge size of bins
+    :return:
+    """
+    vals = np.histogram(data, make_bins(data, binning))
+    sorted_counts = sorted(vals[0])
+    binslist = [i for i in sorted_counts if i > scale * sorted_counts[-1]]
+    filtered_data = []
+    for i in binslist:
+        leftedge = vals[0].tolist().index(i)
+        for datum in data:
+            if datum < vals[1][leftedge + 1] and datum >= vals[1][leftedge]:
+                filtered_data.append(datum)
+    return filtered_data
+
+
+def make_bins(data,width):
+    """
+    :param data: array
+    :param width: float, width of each individual bin
+
+    :return: 1D array of bin edges. passes directly to
+    numpy.histogram or matplotlib.pyplot.hist
+    """
+    return np.arange(min(data), max(data) + width, width)
+
+
+def show_filtering(Image, scale = .5,binning = 1, span = 5):
+    """
+    This function is to help in determining optimal settings for the
+    pinhole filter. The function accepts an image array, then uses
+    `get_offset_distribution`. The distributions are then filtered
+    using `pinhole_filter` according to preference.
+
+    :param Image: 2D image array
+    :param scale: float, passes to pinhole filter
+    :param binning: float, passes to pinhole filter.
+    :param span: int, x-axis limit +/- span from median.
+
+    :return:  histogram of pre and post filtered data
+    """
+    x,y = get_offset_distribution(Image)
+    sc_x = pinhole_filter(x,scale,binning)
+    sc_y = pinhole_filter(y,scale,binning)
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    ax1.hist(x, make_bins(x,binning))
+    ax1.hist(sc_x, make_bins(x,binning))
+    ax2.hist(y, make_bins(y,binning))
+    ax2.hist(sc_y,  make_bins(y,binning))
+    ax1.set_xlim([np.median(x)-span, np.median(x)+span])
+    ax2.set_xlim([np.median(y)-span, np.median(y)+span])
     plt.show()
 
-    # imlist = [imarray]
-    dx, dy = find_global_offset(imlist)
-    print(dx, dy)
-    alignedimage = align_by_offset(imlist[0], dx, dy)
-    overlayed = overlay(alignedimage)
-    plt.imshow(overlayed), plt.show()
 
-main()
+
+
+#
+#def main():
+#    mypath = "/Volumes/LIVDATA/180605Tetraspec/"
+#    filelist = os.listdir(mypath)
+#    imlist = []
+#    # counter = 0
+#    for x in filelist:
+#        if x.startswith("MED"):
+#            with Image.open(mypath + x) as image:
+#                imarray = np.array(image)
+#            imlist.append(imarray)
+#            # plt.hist(get_offset_distribution(imarray)[0])
+#            print(len(get_offset_distribution(imarray)[0]))
+#            # plot_assigned_maxima(imarray)
+#            # print(counter)
+#            # counter += 1
+#    plt.show()
+#
+#    # imlist = [imarray]
+#    dx, dy = find_global_offset(imlist)
+#    print(dx, dy)
+#    alignedimage = align_by_offset(imlist[0], dx, dy)
+#    overlayed = overlay(alignedimage)
+#    plt.imshow(overlayed), plt.show()
+
+#main()
