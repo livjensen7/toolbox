@@ -9,7 +9,9 @@ tutorials.
 """
 
 __all__ = ['two_d_gaussian', 'find_maxima', 'fit_routine']
-__version__ = '0.0.1'
+
+__version__ = "0.1.0"
+
 __author__ = 'Sy Redding'
 
 

@@ -1,12 +1,12 @@
 
-
-<!doctype html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Toolbox: The Redding Lab analysis package &#8212; toolbox 0.0.1 documentation</title>
-    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -22,13 +22,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <!--[if lt IE 9]>
-    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
-    <![endif]-->
+    <link rel="search" title="Search" href="search.html" /> 
   </head>
   <body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -99,7 +94,8 @@ tutorials.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">toolbox.point_fitting</span> <span class="k">import</span> <span class="n">two_d_gaussian</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">two_d_gaussian</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
-<span class="go">array([0.20193045, 0.30539922, 0.97880078, 0.97880078, 0.30539922,0.20193045])</span>
+<span class="go">array([0.20193045, 0.30539922, 0.97880078,</span>
+<span class="go">    0.97880078, 0.30539922,0.20193045])</span>
 </pre></div>
 </div>
 </td>
@@ -189,8 +185,7 @@ of the alignment module’s usage.</p>
 <dl class="function">
 <dt id="alignment.FD_rule_bins">
 <code class="descclassname">alignment.</code><code class="descname">FD_rule_bins</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#alignment.FD_rule_bins" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds the optimal spacing of histogram bins based on the
-Freedman-Diaconis rule. <a class="reference external" href="https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule">https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule</a></p>
+<dd><p>Finds the optimal spacing of histogram bins based on the    Freedman-Diaconis rule. <a class="reference external" href="https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule">https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -198,7 +193,8 @@ Freedman-Diaconis rule. <a class="reference external" href="https://en.wikipedia
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> – 1D array of data points</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">1D array of bin edges. passes directly to numpy.histogram or matplotlib.pyplot.hist</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">1D array of bin edges. passes directly to
+numpy.histogram or matplotlib.pyplot.hist</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -438,21 +434,20 @@ structure.</p>
 
 <dl class="function">
 <dt id="alignment.overlay">
-<code class="descclassname">alignment.</code><code class="descname">overlay</code><span class="sig-paren">(</span><em>Image</em>, <em>low_depth=False</em>, <em>rot=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alignment.overlay" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overlays the two channels derived from Image. Converts Image to an RGB array, with one channel colored magenta and the other green.</p>
+<code class="descclassname">alignment.</code><code class="descname">overlay</code><span class="sig-paren">(</span><em>Image</em>, <em>rot=True</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alignment.overlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlays the two channels derived from Image. Converts Image to an 8-bit RGB array, with one channel colored magenta and the other green.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>Image</strong> – 2D image array</li>
-<li><strong>low_depth</strong> – bool, if True, output is 8 bit image</li>
 <li><strong>rot</strong> – bool, if True, image is rotated 90 degrees</li>
 <li><strong>invert</strong> – bool, if True, inverts the channel color assignment.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">RGB image</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">8-bit RGB image</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">toolbox.alignment</span> <span class="k">import</span> <span class="n">overlay</span>

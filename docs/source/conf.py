@@ -91,7 +91,7 @@ html_theme = 'sphinxdoc'
 #
 # html_theme_options = {}
 autodoc_member_order = 'bysource'
-autodoc_mock_imports = ["numpy","skimage","matplotlib","scipy","toolbox"]
+#autodoc_mock_imports = ["numpy","skimage","matplotlib","scipy","toolbox"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

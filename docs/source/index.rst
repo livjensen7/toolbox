@@ -7,7 +7,7 @@ Toolbox: The Redding Lab analysis package
 =========================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
 
@@ -22,5 +22,9 @@ The alignment module
 .. automodule:: alignment
    :members:
 
+The misc module
+**************************
+.. automodule:: misc
+   :members:
 
 
