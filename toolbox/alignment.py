@@ -520,7 +520,7 @@ def overlay(Image, splitstyle="hsplit", rot=True, invert=False):
     rgb_stack *= 255
     rgb_stack = rgb_stack.astype(np.uint8)
     return rgb_stack
-<<<<<<< HEAD
+# <<<<<<< HEAD
 
 =======
 >>>>>>> d1dfccf5c994675c59d31b0cfd441b275ffd7a3c
